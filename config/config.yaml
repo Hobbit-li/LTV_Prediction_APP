@@ -1,1 +1,26 @@
+features:
+  - D0_avg_lv_times
+  - D1_coin_cost
+  - D1_prop_use
+  - D2_avg_lv_times
+
+targets:
+  - LTV_D7
+  - LTV_D14
+  - LTV_D30
+
+model_params:
+  learning_rate: 0.05
+  n_estimators: 200
+  max_depth: 7
+  objective: "regression"
+
+train:
+  test_size: 0.2
+  random_state: 42
+  model_output_path: "models/saved_model.pkl"
+  use_log_label: true
+
+data:
+  train_path: "data/raw/train.csv"
 
