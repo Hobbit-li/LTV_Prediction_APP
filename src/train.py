@@ -2,8 +2,8 @@
 # Essentially, predict whether players who have not paid previously will make a breakthrough payment in the subsequent prediction period
 # Since the number of paid users is very small, increase the weight of positive samples
 
-import pandas as pd                     # DataFrame 操作，concat，copy，isna 等
-import numpy as np                      # np.log1p, np.argsort, np.expm1
+import pandas as pd                     
+import numpy as np                     
 import lightgbm as lgb                  
 from sklearn.metrics import (           
     classification_report,
@@ -11,6 +11,13 @@ from sklearn.metrics import (
     mean_squared_log_error,
     r2_score
 )
+import logging
+
+from config_loader import load_config
+config = load_config()
+payer_tag = config["payer_tag"]
+params_clf = config["params_clf"]
+cat_features = config["cat_features"]
 
 def train_clf(X_train, X_valid, y_train, y_valid, params_clf=params_clf, payer_tag=payer_tag):
     '''
@@ -20,7 +27,7 @@ def train_clf(X_train, X_valid, y_train, y_valid, params_clf=params_clf, payer_t
     '''
     existing_payer_tag = [col for col in payer_tag if col in X_train.columns]
     if not existing_payer_tag:
-        raise ValueError("❌ None of the payer_tag columns are present in X, unable to identify unpaid users.")
+        raise ValueError("None of the payer_tag columns are present in X, unable to identify unpaid users.")
         
     # Feature processing
     # Keep only active dimension features
@@ -62,7 +69,7 @@ def r2_eval(preds, train_data):
     labels = train_data.get_label()
     return 'r2', r2_score(labels, preds), True
 def train_reg(
-    X_train, X_valid, y_train, y_valid, params, num_features, cat_features, 
+    X_train, X_valid, y_train, y_valid, params_reg=params_reg, num_features, cat_features=cat_features, 
     value_weighting=True):
     
     '''
@@ -98,12 +105,11 @@ def train_reg(
         top_k_idx = np.argsort(y_train.values)[-top_num:]  # Top 10 largest samples
         train_weights[top_k_idx] = base_weights[-1]  # Force the value to 1000
 
-    print(pd.value_counts(train_weights, sort=False))
-
-        # high_value_threshold = np.quantile(y_train, quantile)
-        # high_value_mask = y_train >= high_value_threshold
-        # train_weights[high_value_mask] = weight_multiplier
-        # print(f"⚖️ Weighted high-value users: {high_value_mask.sum()} samples have their weight set to {weight_multiplier}")
+    # print(pd.value_counts(train_weights, sort=False))
+        
+    # logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+    counts = pd.value_counts(train_weights, sort=False)
+    logging.info("Train weight counts:\n%s", counts.to_string())
 
     features = num_features + cat_features
     
@@ -167,7 +173,7 @@ def train_process(X_train_1, X_valid_1, X_train_2, X_valid_2, y_train_1, y_valid
     # Predict on dataset 1
     existing_payer_tag = [col for col in payer_tag if col in X_train_1.columns]
     if not existing_payer_tag:
-        raise ValueError("❌ None of the payer_tag columns are present in X, unable to identify unpaid users.")
+        raise ValueError("None of the payer_tag columns are present in X, unable to identify unpaid users.")
     temp = clf_valid.predict(X_train_1.drop(columns=existing_payer_tag))
     
     # Create deep copy
