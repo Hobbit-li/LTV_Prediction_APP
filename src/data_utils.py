@@ -1,13 +1,16 @@
 import pandas as pd  
+from config_loader import load_config
 
-def paid_split(X, y, payer_tag):
+config = load_config()
+payer_tag = config["payer_tag"]
+
+def paid_split(X, y, payer_tag=payer_tag):
     
     '''
     split the users
-    set 1: HAVE Unpaid until the current peroid
+    set 1: HAVE Unpaid until the current period
     set 2: HAVE Paid until the peroid
     '''
-    
     existing_payer_tag = [col for col in payer_tag if col in X.columns]
     if not existing_payer_tag:
         raise ValueError("❌ None of the payer_tag columns are present in X, unable to identify unpaid users.")
