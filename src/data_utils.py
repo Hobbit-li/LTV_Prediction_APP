@@ -1,3 +1,5 @@
+import pandas as pd  
+
 def paid_split(X, y, payer_tag):
     
     '''
