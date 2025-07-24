@@ -196,3 +196,30 @@ num_features_map:
     - avg_dur5months
     - pay_in5months
     - avg_usd5months
+
+##### model parameters
+# classification params
+params_clf:
+  objective: binary
+  metric: binary_logloss
+  boosting_type: gbdt
+  learning_rate: 0.05
+  scale_pos_weight: 90
+  num_leaves: 31
+  verbose: -1
+
+# regression params
+params_reg:
+  objective: regression        # Objective function for regression tasks (predict continuous values)
+  metric:                       # Evaluation metric, using RMSE (Root Mean Squared Error)
+    - rmse
+  boosting_type: gbdt          # Boosting method, GBDT = Gradient Boosting Decision Tree
+  learning_rate: 0.05          # Learning rate, scales the contribution of each iteration; smaller is more stable but needs more iterations
+  max_depth: 12                # Maximum depth of the tree, controls model complexity and prevents overfitting
+  num_leaves: 4096             # Maximum number of leaves per tree (usually <= 2^max_depth)
+  feature_fraction: 0.70       # Fraction of features used for training each tree (feature sampling to prevent overfitting)
+  subsample: 0.75              # Fraction of data used for each iteration (bagging, sample subsampling)
+  seed: 114                   # Random seed for reproducibility
+  num_iterations: 10000        # Maximum number of boosting iterations (max trees)
+  nthread: -1                 # Use all available CPU cores (automatic thread setting)
+  verbose: -1                 # Output level, -1 means no training logs
