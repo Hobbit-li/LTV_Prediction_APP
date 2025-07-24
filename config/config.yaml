@@ -5,7 +5,7 @@ path_pre: "/kaggle/input/fat-2024-09/20250703_113345_36014_2gnin.csv"    # predi
 
 # LTV prediction days
 days_list: [7, 30, 60, 90, 120, 240, 300]
-
+days_list_existed: [7, 30, 60, 90, 120]
 # Total cost for the cohort to be predicted
 cost: 949401
 
