@@ -7,6 +7,9 @@
 import matplotlib.pyplot as plt   #
 from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_squared_log_error, r2_score  
 
+from config_loader import load_config
+config = load_config()
+days_list_existed = config["days_list_existed"]
 def compara_plot(days_list_existed=days_list_existed, preds_results):
   '''
     Objective: show the actual and the predicted LTV increasingly
