@@ -1,7 +1,9 @@
 # Predict and save results
 # result_df = pd.DataFrame({
 #     'user_id': id_test.values
-
+import pandas as pd      # DataFrame 操作、concat、copy 等
+import numpy as np       # np.expm1、np.clip
+import lightgbm as lgb
 def predict_process(X1, X2, y1, y2, model1, model2):
     '''
         Classification model prediction.
