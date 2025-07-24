@@ -4,7 +4,12 @@
 import pandas as pd      # DataFrame 操作、concat、copy 等
 import numpy as np       # np.expm1、np.clip
 import lightgbm as lgb
-def predict_process(X1, X2, y1, y2, model1, model2):
+
+from config_loader import load_config
+config = load_config()
+payer_tag = config["payer_tag"]
+
+def predict_process(X1, X2, y1, y2, model1, model2, payer_tag=payer_tag):
     '''
         Classification model prediction.
         Extract groups with potential to pay.
