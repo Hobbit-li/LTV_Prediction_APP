@@ -3,6 +3,10 @@
 # model evaluate
 
 # existing life cycles for valid
+
+import matplotlib.pyplot as plt   #
+from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_squared_log_error, r2_score  
+
 def compara_plot(days_list_existed=days_list_existed, preds_results):
   '''
     Objective: show the actual and the predicted LTV increasingly
