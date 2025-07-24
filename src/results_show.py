@@ -1,3 +1,5 @@
+import pandas as pd
+
 def show_roas_ltv(preds_results, days_list=days_list, cost=cost):
     """
     Evaluate predicted vs. actual ROAS and LTV values.
