@@ -3,6 +3,11 @@ __pycache__/
 *.py[cod]
 *.pyo
 
+# 忽略输出目录下所有，但保留一个示例
+outputs/*
+!outputs/example_results.csv
+!outputs/example_model.pkl
+
 # Jupyter 检查点
 .ipynb_checkpoints/
 
