@@ -1,26 +1,198 @@
-features:
-  - D0_avg_lv_times
-  - D1_coin_cost
-  - D1_prop_use
-  - D2_avg_lv_times
+#####  need be modified ususlly
+# File paths
+path_ref: "/kaggle/input/fat-2024-7-8/20250703_113205_35764_2gnin.csv"   # historical data path
+path_pre: "/kaggle/input/fat-2024-09/20250703_113345_36014_2gnin.csv"    # prediction target data
 
-targets:
-  - LTV_D7
-  - LTV_D14
-  - LTV_D30
+# LTV prediction days
+days_list: [7, 30, 60, 90, 120, 240, 300]
 
-model_params:
-  learning_rate: 0.05
-  n_estimators: 200
-  max_depth: 7
-  objective: "regression"
+# Total cost for the cohort to be predicted
+cost: 949401
 
-train:
-  test_size: 0.2
-  random_state: 42
-  model_output_path: "models/saved_model.pkl"
-  use_log_label: true
+# Weight quantiles and corresponding weights
+percentiles: [0.5, 0.8, 0.9, 0.95, 0.995, 1.0]
+base_weights: [1, 5, 10, 50, 500, 1000]
 
-data:
-  train_path: "data/raw/train.csv"
+# Number of top players (used for training weight adjustments)
+top_num: 200
 
+
+
+#####  un-modified 
+# Payer tag columns (used to drop features for non-paying users)
+# list
+payer_tag:
+  - d0_usd
+  - pay_in3days
+  - pay_in7days
+  - pay_in30days
+  - pay_in2month
+  - pay_in3month
+  - pay_in4month
+  - pay_in5months
+  - avg_usd3days
+  - avg_usd7days
+  - avg_usd30days
+  - avg_usd2month
+  - avg_usd3month
+  - avg_usd4month
+  - avg_usd5months
+
+# Categorical features
+cat_features: [countrytype, os, source, install_device, social_type]
+
+# Target columns (multi-output)
+target_col: 
+  - LTV_7day
+  - LTV_30day
+  - LTV_60day
+  - LTV_90day
+  - LTV_120day
+  - LTV_240day
+  - LTV_300day
+
+# User ID column
+id_col: user_id
+
+# Numerical features by prediction period
+num_features_map:
+  7:
+    - first_duration
+    - d0_duration
+    - active_in3days
+    - avg_dur3days
+    - d0_usd
+    - pay_in3days
+    - avg_usd3days
+  30:
+    - first_duration
+    - d0_duration
+    - active_in3days
+    - avg_dur3days
+    - d0_usd
+    - pay_in3days
+    - avg_usd3days
+    - active_in7days
+    - avg_dur7days
+    - pay_in7days
+    - avg_usd7days
+  60:
+    - first_duration
+    - d0_duration
+    - active_in3days
+    - avg_dur3days
+    - d0_usd
+    - pay_in3days
+    - avg_usd3days
+    - active_in7days
+    - avg_dur7days
+    - pay_in7days
+    - avg_usd7days
+    - active_in30days
+    - avg_dur30days
+    - pay_in30days
+    - avg_usd30days
+  90:
+    - first_duration
+    - d0_duration
+    - active_in3days
+    - avg_dur3days
+    - d0_usd
+    - pay_in3days
+    - avg_usd3days
+    - active_in7days
+    - avg_dur7days
+    - pay_in7days
+    - avg_usd7days
+    - active_in30days
+    - avg_dur30days
+    - pay_in30days
+    - avg_usd30days
+    - active_in2month
+    - avg_dur2month
+    - pay_in2month
+    - avg_usd2month
+  120:
+    - first_duration
+    - d0_duration
+    - active_in3days
+    - avg_dur3days
+    - d0_usd
+    - pay_in3days
+    - avg_usd3days
+    - active_in7days
+    - avg_dur7days
+    - pay_in7days
+    - avg_usd7days
+    - active_in30days
+    - avg_dur30days
+    - pay_in30days
+    - avg_usd30days
+    - active_in2month
+    - avg_dur2month
+    - pay_in2month
+    - avg_usd2month
+    - active_in3month
+    - avg_dur3month
+    - pay_in3month
+    - avg_usd3month
+  240:
+    - first_duration
+    - d0_duration
+    - active_in3days
+    - avg_dur3days
+    - d0_usd
+    - pay_in3days
+    - avg_usd3days
+    - active_in7days
+    - avg_dur7days
+    - pay_in7days
+    - avg_usd7days
+    - active_in30days
+    - avg_dur30days
+    - pay_in30days
+    - avg_usd30days
+    - active_in2month
+    - avg_dur2month
+    - pay_in2month
+    - avg_usd2month
+    - active_in3month
+    - avg_dur3month
+    - pay_in3month
+    - avg_usd3month
+    - active_in4month
+    - avg_dur4month
+    - pay_in4month
+    - avg_usd4month
+  300:
+    - first_duration
+    - d0_duration
+    - active_in3days
+    - avg_dur3days
+    - d0_usd
+    - pay_in3days
+    - avg_usd3days
+    - active_in7days
+    - avg_dur7days
+    - pay_in7days
+    - avg_usd7days
+    - active_in30days
+    - avg_dur30days
+    - pay_in30days
+    - avg_usd30days
+    - active_in2month
+    - avg_dur2month
+    - pay_in2month
+    - avg_usd2month
+    - active_in3month
+    - avg_dur3month
+    - pay_in3month
+    - avg_usd3month
+    - active_in4month
+    - avg_dur4month
+    - pay_in4month
+    - avg_usd4month
+    - active_in5months
+    - avg_dur5months
+    - pay_in5months
+    - avg_usd5months
