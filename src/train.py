@@ -48,6 +48,9 @@ def train_clf(X_train, X_valid, y_train, y_valid, params_clf=params_clf, payer_t
 
 
 # Wrapper -- Training and prediction for the model
+def r2_eval(preds, train_data):
+    labels = train_data.get_label()
+    return 'r2', r2_score(labels, preds), True
 def train_reg(
     X_train, X_valid, y_train, y_valid, params, num_features, cat_features, 
     value_weighting=True):
