@@ -1,0 +1,4 @@
+user_id,LTV_7day_pred,LTV_7day_actual,LTV_30day_pred,LTV_30day_actual
+10001,2.34,2.50,5.67,5.80
+10002,0.95,1.10,3.12,3.30
+10003,1.80,1.75,4.45,4.60
