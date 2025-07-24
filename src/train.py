@@ -2,6 +2,16 @@
 # Essentially, predict whether players who have not paid previously will make a breakthrough payment in the subsequent prediction period
 # Since the number of paid users is very small, increase the weight of positive samples
 
+import pandas as pd                     # DataFrame 操作，concat，copy，isna 等
+import numpy as np                      # np.log1p, np.argsort, np.expm1
+import lightgbm as lgb                  
+from sklearn.metrics import (           
+    classification_report,
+    roc_auc_score,
+    mean_squared_log_error,
+    r2_score
+)
+
 def train_clf(X_train, X_valid, y_train, y_valid, params_clf=params_clf, payer_tag=payer_tag):
     '''
         Dataset: Users who have not paid during the feature period
