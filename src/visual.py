@@ -10,7 +10,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_square
 from config_loader import load_config
 config = load_config()
 days_list_existed = config["days_list_existed"]
-def compara_plot(days_list_existed=days_list_existed, preds_results):
+def compara_plot(preds_results, days_list_existed=days_list_existed):
   '''
     Objective: show the actual and the predicted LTV increasingly
     days_list_existed: have existed days for valid
@@ -32,7 +32,7 @@ def compara_plot(days_list_existed=days_list_existed, preds_results):
 
 
 # Indicator evaluation
-def evaluate_ltv(days_list_existed=days_list_existed, preds_results):
+def evaluate_ltv( preds_results, days_list_existed=days_list_existed):
   '''
     return RMSE, MAE, MSLE, R2
     user sample
@@ -58,7 +58,7 @@ def evaluate_ltv(days_list_existed=days_list_existed, preds_results):
     return eval_dict
 
 # Residual analysis
-def compara_plot(days_list_existed=days_list_existed, preds_results):
+def compara_plot(preds_results, days_list_existed=days_list_existed):
   '''
     Objective: show the residuals of LTV
     days_list_existed: have existed days for valid
