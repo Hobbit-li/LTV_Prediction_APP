@@ -70,7 +70,7 @@ def r2_eval(preds, train_data):
     labels = train_data.get_label()
     return 'r2', r2_score(labels, preds), True
 def train_reg(
-    X_train, X_valid, y_train, y_valid, params_reg=params_reg, num_features, cat_features=cat_features, 
+    X_train, X_valid, y_train, y_valid, params_reg=params_reg, num_features=[], cat_features=cat_features, 
     value_weighting=True):
     
     '''
@@ -150,7 +150,7 @@ def train_reg(
 # Training process wrapper
 # Fixed prediction period
 # Compatible with empty validation set
-def train_process(X_train_1, X_valid_1, X_train_2, X_valid_2, y_train_1, y_valid_1, y_train_2, y_valid_2, params_clf=params_clf, params_reg=params_reg, num_features, cat_features=cat_features, payer_tag=payer_tag):
+def train_process(X_train_1, X_valid_1, X_train_2, X_valid_2, y_train_1, y_valid_1, y_train_2, y_valid_2, params_clf=params_clf, params_reg=params_reg, num_features=[], cat_features=cat_features, payer_tag=payer_tag):
     '''
     The binary classification model determines future payment behavior.
     The regression model predicts future LTV.
