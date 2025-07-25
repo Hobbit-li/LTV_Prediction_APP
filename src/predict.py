@@ -30,7 +30,7 @@ def predict_process(x1_df, x2_df, y1, y2, model1, model2, config: dict):
     """
     payer_tag = config["payer_tag"]
     id_test = config["id_test"]
-    
+
     existing_payer_tag = [col for col in payer_tag if col in x1_df.columns]
     if not existing_payer_tag:
         raise ValueError(
