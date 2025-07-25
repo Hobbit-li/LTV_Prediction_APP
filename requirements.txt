@@ -6,4 +6,5 @@ lightgbm
 pyyaml
 logging
 pylint
+black
 matplotlib
