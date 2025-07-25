@@ -6,3 +6,4 @@ lightgbm
 pyyaml
 logging
 pylint
+matplotlib
