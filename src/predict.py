@@ -6,13 +6,6 @@ import numpy as np
 # config = load_config()
 # payer_tag = config["payer_tag"]
 
-"""
-    This module handles the prediction pipeline for the LTV model, including:
-    - Classification model prediction
-    - Extract groups with potential to pay
-    - Regression model predicts LTV
-"""
-
 
 def predict_process(x1_df, x2_df, y1, y2, model1, model2, config: dict):
     """
