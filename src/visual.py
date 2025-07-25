@@ -4,7 +4,7 @@
 
 # existing life cycles for valid
 
-import matplotlib.pyplot as plt   #
+import matplotlib.pyplot as plt   
 from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_squared_log_error, r2_score  
 
 from config_loader import load_config
@@ -58,7 +58,7 @@ def evaluate_ltv( preds_results, days_list_existed=days_list_existed):
     return eval_dict
 
 # Residual analysis
-def compara_plot(preds_results, days_list_existed=days_list_existed):
+def residual_plot(preds_results, days_list_existed=days_list_existed):
   '''
     Objective: show the residuals of LTV
     days_list_existed: have existed days for valid
