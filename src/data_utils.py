@@ -69,14 +69,14 @@ def data_preprocess(
         # Store all sets in dict
         result["train"][day] = {
             "all": (X_train_day, y_train_day),
-            "payer": (X_train_day_1, y_train_day_1),
-            "nonpayer": (X_train_day_2, y_train_day_2),
+            "nonpayer": (X_train_day_1, y_train_day_1),
+            "payer": (X_train_day_2, y_train_day_2),
         }
 
         result["valid"][day] = {
             "all": (X_valid_day, y_valid_day),
-            "payer": (X_valid_day_1, y_valid_day_1),
-            "nonpayer": (X_valid_day_2, y_valid_day_2),
+            "nonpayer": (X_valid_day_1, y_valid_day_1),
+            "payer": (X_valid_day_2, y_valid_day_2),
         }
 
     return result
