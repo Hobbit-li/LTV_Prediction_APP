@@ -1,6 +1,5 @@
-
-import pandas as pd  
-import numpy as np  
+import pandas as pd
+import numpy as np
 
 # from config_loader import load_config
 
@@ -14,10 +13,11 @@ import numpy as np
     - Regression model predicts LTV
 """
 
-def predict_process(x1_df, x2_df, y1, y2, model1, model2, config:dict):
+
+def predict_process(x1_df, x2_df, y1, y2, model1, model2, config: dict):
     """
     Execute the full prediction process
-    
+
     Args:
         x1_df (pd.DataFrame): Features for non-payer prediction
         x2_df (pd.DataFrame): Features for payer prediction
@@ -26,7 +26,7 @@ def predict_process(x1_df, x2_df, y1, y2, model1, model2, config:dict):
         id_test (pd.Series): Test set identifiers
         payer_tag (str): Column name indicating payer status
         days_list (list): List of prediction days
-        
+
     Returns:
         pd.DataFrame: Final predictions with LTV values
     """
@@ -41,7 +41,10 @@ def predict_process(x1_df, x2_df, y1, y2, model1, model2, config:dict):
     # print(eval(f"X_test_day{day}_1").drop(columns=existing_payer_tag).head())
 
     temp = model1.predict(
-        x1_df.drop(columns=existing_payer_tag), num_iteration=(model1.best_iteration if model1.best_iteration is not None else 100)
+        x1_df.drop(columns=existing_payer_tag),
+        num_iteration=(
+            model1.best_iteration if model1.best_iteration is not None else 100
+        ),
     )
 
     # Deep copy
@@ -55,7 +58,12 @@ def predict_process(x1_df, x2_df, y1, y2, model1, model2, config:dict):
     )
     y_combined = pd.concat([y1[mask_payfu], y2], axis=0)
 
-    preds_log = model2.predict(x_df_combined, num_iteration=(model2.best_iteration if model2.best_iteration is not None else 100))
+    preds_log = model2.predict(
+        x_df_combined,
+        num_iteration=(
+            model2.best_iteration if model2.best_iteration is not None else 100
+        ),
+    )
     preds = pd.Series(np.expm1(preds_log)).clip(lower=0).values
 
     x_df_combined["actual"] = y_combined.values
