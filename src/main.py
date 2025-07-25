@@ -116,10 +116,10 @@ def main():
   preds_results = {}
   for day in days_list:
     X_test_nonpayer, y_test_nonpayer = temp_result_test['train'][day]['nonpayer']
-    X_test_payer, y_test_payer       = temp_result_test['train'][day]['payer']
+    X_test_payer, y_test_payer = temp_result_test['train'][day]['payer']
     
     preds_results[day] = predict_process(
-          eval(X_test_nonpayer, X_test_payer, y_test_nonpayer, y_test_payer, 
+          X_test_nonpayer, X_test_payer, y_test_nonpayer, y_test_payer, 
           model_test[day]['model_clf'], model_test[day]['model_reg'])
       # print(preds_results[day].head())
     preds_results[day].to_csv(f"prediction_results_DA_DAY{day}.csv", index=False, encoding='utf-8-sig')
