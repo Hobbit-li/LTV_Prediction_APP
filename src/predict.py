@@ -23,16 +23,14 @@ def predict_process(x1_df, x2_df, y1, y2, model1, model2, config: dict):
         x2_df (pd.DataFrame): Features for payer prediction
         model1 (Classifier): Trained classifier model
         model2 (Regressor): Trained regressor model
-        id_test (pd.Series): Test set identifiers
-        payer_tag (str): Column name indicating payer status
-        days_list (list): List of prediction days
+        config: Laod the config.yaml
 
     Returns:
         pd.DataFrame: Final predictions with LTV values
     """
     payer_tag = config["payer_tag"]
     id_test = config["id_test"]
-    days_list = config["days_list"]
+    
     existing_payer_tag = [col for col in payer_tag if col in x1_df.columns]
     if not existing_payer_tag:
         raise ValueError(
@@ -68,7 +66,6 @@ def predict_process(x1_df, x2_df, y1, y2, model1, model2, config: dict):
 
     x_df_combined["actual"] = y_combined.values
     x_df_combined["pred"] = preds
-    # print(eval(f"X_combined_test_day{day}").head())
 
     # Add information for players predicted not to pay in the next step
     x1_df_copy.loc[~mask_payfu, "actual"] = y1[~mask_payfu].values
