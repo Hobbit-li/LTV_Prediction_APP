@@ -26,10 +26,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install black pylint
 
-      - name: Run Black (format check)
+      - name: Run Black (auto format)
         run: |
-          black --check .
+          black .
+
+      - name: Auto commit formatted code
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: auto-format with Black"
 
       - name: Run Pylint (code quality)
         run: |
-          pylint $(git ls-files '*.py') || true  # show the score
+          pylint $(git ls-files '*.py') || true
