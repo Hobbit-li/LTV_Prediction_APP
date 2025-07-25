@@ -1,24 +1,103 @@
-import pandas as pd  
+import pandas as pd
 from config_loader import load_config
+from sklearn.model_selection import train_test_split
 
 config = load_config()
+
 payer_tag = config["payer_tag"]
+num_features = config["num_features"]
+cat_features = config["cat_features"]
+target_col = config["target_col"]
+id_col = config["id_col"]
+days_list = config["days_list"]
+num_features_map = config["num_features_map"]
+
+
+def data_preprocess(
+    df,
+    train_data=True,
+    num_features=num_features,
+    cat_features=cat_features,
+    target_col=target_col,
+    id_col=id_col,
+    days_list=days_list,
+    num_features_map=num_features_map,
+    payer_tag=payer_tag,
+):
+    """
+    After load the original data
+    split it into different life cycles
+    """
+
+    X = df[num_features + cat_features]
+    y = dfconfig[target_col]
+    user_ids = df[id_col]
+
+    # transform type: category
+    for col in cat_features:
+        X[col] = X[col].astype("category")
+
+    if train_data:
+        X_train, X_valid, y_train, y_valid, id_train, id_valid = train_test_split(
+            X, y, user_ids, test_size=0.3, random_state=42
+        )
+    else:
+        X_train = X_valid = X
+        y_train = y_valid = y
+        id_train = id_valid = user_ids
+
+    # Store outputs
+    result = {"train": {}, "valid": {}}
+
+    for i, day in enumerate(days_list):
+        features = num_features_map[day] + cat_features
+
+        # Get feature and target subsets
+        X_train_day = X_train[features]
+        X_valid_day = X_valid[features]
+        y_train_day = y_train.iloc[:, i]
+        y_valid_day = y_valid.iloc[:, i]
+
+        # Split into payer vs non-payer
+        X_train_day_1, X_train_day_2, y_train_day_1, y_train_day_2 = paid_split(
+            X_train_day, y_train_day, payer_tag
+        )
+        X_valid_day_1, X_valid_day_2, y_valid_day_1, y_valid_day_2 = paid_split(
+            X_valid_day, y_valid_day, payer_tag
+        )
+
+        # Store all sets in dict
+        result["train"][day] = {
+            "all": (X_train_day, y_train_day),
+            "nonpayer": (X_train_day_1, y_train_day_1),
+            "payer": (X_train_day_2, y_train_day_2),
+        }
+
+        result["valid"][day] = {
+            "all": (X_valid_day, y_valid_day),
+            "nonpayer": (X_valid_day_1, y_valid_day_1),
+            "payer": (X_valid_day_2, y_valid_day_2),
+        }
+
+    return result
+
 
 def paid_split(X, y, payer_tag=payer_tag):
-    
-    '''
+    """
     split the users
     set 1: HAVE Unpaid until the current period
     set 2: HAVE Paid until the peroid
-    '''
+    """
     existing_payer_tag = [col for col in payer_tag if col in X.columns]
     if not existing_payer_tag:
-        raise ValueError("❌ None of the payer_tag columns are present in X, unable to identify unpaid users.")
-        
+        raise ValueError(
+            "❌ None of the payer_tag columns are present in X, unable to identify unpaid users."
+        )
+
     # Unpaid samples during the feature period (Set 1)
-    mask_unpaid = (X[existing_payer_tag].sum(axis=1) == 0)
+    mask_unpaid = X[existing_payer_tag].sum(axis=1) == 0
     X1 = X[mask_unpaid]
-    y1 = y[mask_unpaid] 
+    y1 = y[mask_unpaid]
 
     # Paid samples during the feature period (Set 2)
     mask_paid = ~mask_unpaid

@@ -1,9 +1,12 @@
 import pandas as pd
 
 from config_loader import load_config
+
 config = load_config()
 days_list = config["days_list"]
 cost = config["cost"]
+
+
 def show_roas_ltv(preds_results, days_list=days_list, cost=cost):
     """
     Evaluate predicted vs. actual ROAS and LTV values.
@@ -36,7 +39,7 @@ def show_roas_ltv(preds_results, days_list=days_list, cost=cost):
             "ROAS_pred": roas_pred,
             "ROAS_actual": roas_actual,
             "LTV_pred": ltv_pred,
-            "LTV_actual": ltv_actual
+            "LTV_actual": ltv_actual,
         }
 
     return result

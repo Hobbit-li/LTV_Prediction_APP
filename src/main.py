@@ -1,25 +1,37 @@
 from IPython.display import Image
+
 # Image("/kaggle/input/process-image/deepseek_mermaid_20250613_79aa76.png", width=500)  # adjust the width
+
 
 # import necessary packages
 import warnings
-warnings.simplefilter('ignore')
+
+warnings.simplefilter("ignore")
 
 import os
 import gc
 
 import numpy as np
 import pandas as pd
-pd.set_option('display.max_columns', None)
+
+pd.set_option("display.max_columns", None)
 from tqdm.auto import tqdm
 
 from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_squared_log_error, r2_score, classification_report, roc_auc_score
+from sklearn.metrics import (
+    mean_squared_error,
+    mean_absolute_error,
+    mean_squared_log_error,
+    r2_score,
+    classification_report,
+    roc_auc_score,
+)
 
 import lightgbm as lgb
 from lightgbm import LGBMClassifier
 import logging
 from sklearn.model_selection import train_test_split
+
 
 # import modules in the same path
 from config_loader import load_config
@@ -118,7 +130,6 @@ def main():
   re_dict = evaluate_ltv(preds_results)
   compara_plot(preds_results)
   roas_results = show_roas_ltv(preds_results)
-
 
 if __name__ == "__main__":
     main()
