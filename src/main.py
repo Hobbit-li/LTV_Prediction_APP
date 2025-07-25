@@ -43,7 +43,6 @@ from utils import create_output_dir, save_predictions, save_metrics, save_model
 from visual import compare_plot, evaluate_ltv, residual_plot
 
 
-
 def main():
     # params load
     config = load_config()
