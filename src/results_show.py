@@ -1,13 +1,10 @@
-import pandas as pd
+"""
+Results Presentation Module
 
-from config_loader import load_config
+Contains functions for displaying and analyzing model results
+"""
 
-config = load_config()
-days_list = config["days_list"]
-cost = config["cost"]
-
-
-def show_roas_ltv(preds_results, days_list=days_list, cost=cost):
+def show_roas_ltv(preds_results, config):
     """
     Evaluate predicted vs. actual ROAS and LTV values.
 
@@ -26,6 +23,8 @@ def show_roas_ltv(preds_results, days_list=days_list, cost=cost):
           }, ...
       }
     """
+    days_list = config["days_list"]
+    cost = config["cost"]
     result = {}
 
     for day in days_list:
