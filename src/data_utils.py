@@ -16,8 +16,8 @@ Contains helper functions for data processing:
 
 def data_preprocess(
     df,
-    train_data=True,
-    config: dict
+    config:dict,
+    train_data=True
 ):
     """
     Preprocess data and split into payer/non-payer groups for each prediction day.
