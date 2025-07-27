@@ -1,49 +1,62 @@
-from IPython.display import Image
+"""
+Main Execution Module
 
-# Image("/kaggle/input/process-image/deepseek_mermaid_20250613_79aa76.png", width=500)  # adjust the width
+Orchestrates the full model pipeline:
+1. Data loading and preprocessing
+2. Model training
+3. Prediction generation
+4. Result evaluation
+"""
 
-
+# from IPython.display import Image
+# Image("/kaggle/input/process-image/deepseek_mermaid_20250613_79aa76.png", width=500)
 # import necessary packages
-import warnings
-
-warnings.simplefilter("ignore")
-
-import os
 import gc
-
-import numpy as np
-import pandas as pd
-
-pd.set_option("display.max_columns", None)
-from tqdm.auto import tqdm
-
-from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import (
-    mean_squared_error,
-    mean_absolute_error,
-    mean_squared_log_error,
-    r2_score,
-    classification_report,
-    roc_auc_score,
-)
+import logging
+import os
+import warnings
+from typing import Any, Dict, Optional, Tuple
 
 import lightgbm as lgb
+import numpy as np
+import pandas as pd
 from lightgbm import LGBMClassifier
-import logging
+from sklearn.metrics import (
+    classification_report,
+    mean_absolute_error,
+    mean_squared_error,
+    mean_squared_log_error,
+    r2_score,
+    roc_auc_score,
+)
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from tqdm.auto import tqdm
 
-
-# import modules in the same path
+# Local application/library specific imports
 from config_loader import load_config
-from data_utils import paid_split, date_preprocess
+from data_utils import data_preprocess
 from predict import predict_process
 from results_show import show_roas_ltv
 from train import train_process
-from utils import create_output_dir, save_predictions, save_metrics, save_model
+from utils_io import create_output_dir, save_metrics, save_model, save_predictions
 from visual import compare_plot, evaluate_ltv, residual_plot
 
-
 def main():
+    """
+    Execute end-to-end model workflow
+    
+    Steps:
+    1. Load configuration
+    2. Preprocess data
+    3. Train models
+    4. Generate predictions
+    5. Evaluate performance
+    6. Save outputs
+    """
+    # Configuration
+    warnings.simplefilter("ignore")
+    pd.set_option("display.max_columns", None)
     # params load
     config = load_config()
     # load the historical referrence data
@@ -67,7 +80,7 @@ def main():
     params_clf = config["params_clf"]
     params_reg = config["params_reg"]
 
-    # retrain the model using valid data
+    # train process 
     model_results = {}
     for day in days_list:
         X_train_nonpayer, y_train_nonpayer = temp_result["train"][day]["nonpayer"]
@@ -84,10 +97,7 @@ def main():
             y_valid_nonpayer,
             y_train_payer,
             y_valid_payer,
-            params_clf,
-            params_reg,
-            num_features_map[day],
-            cat_features,
+            config
         )
 
     # retrain the model using valid data
@@ -110,10 +120,7 @@ def main():
             y_clf,
             y_reg,
             y_reg,
-            params_clf,
-            params_reg,
-            num_features_map[day],
-            cat_features,
+            config
         )
 
     # load the test data
