@@ -1,10 +1,11 @@
-# Build a classification model - Predict whether a player will pay or not
-# Essentially, predict whether players who have not paid previously will make a breakthrough payment in the subsequent prediction period
-# Since the number of paid users is very small, increase the weight of positive samples
-
+"""
+Model Training Module
+Contains functions for training classifier and regressor models
+"""
 import pandas as pd
 import numpy as np
 import lightgbm as lgb
+import logging
 from sklearn.metrics import (
     classification_report,
     roc_auc_score,
@@ -12,38 +13,34 @@ from sklearn.metrics import (
     r2_score,
 )
 
-import logging
-
-from config_loader import load_config
-
-config = load_config()
-payer_tag = config["payer_tag"]
-params_clf = config["params_clf"]
-cat_features = config["cat_features"]
-
-
 def train_clf(
-    X_train, X_valid, y_train, y_valid, params_clf=params_clf, payer_tag=payer_tag
+    x_train, 
+    x_valid, 
+    y_train, 
+    y_valid, 
+    config
 ):
     """
     Dataset: Users who have not paid during the feature period
     Binary classification: Predict whether a breakthrough payment will occur in the subsequent period, 0/1
     return: Model and model performance evaluation
     """
-    existing_payer_tag = [col for col in payer_tag if col in X_train.columns]
+    payer_tag = config["payer_tag"]
+    params_clf = config["params_clf"]
+    existing_payer_tag = [col for col in payer_tag if col in x_train.columns]
     if not existing_payer_tag:
         raise ValueError(
-            "None of the payer_tag columns are present in X, unable to identify unpaid users."
+            "None of the payer_tag columns are present in x, unable to identify unpaid users."
         )
 
     # Feature processing
     # Keep only active dimension features
-    X_tr = X_train.drop(columns=existing_payer_tag)
-    X_val = X_valid.drop(columns=existing_payer_tag)
+    x_tr = x_train.drop(columns=existing_payer_tag)
+    x_val = x_valid.drop(columns=existing_payer_tag)
     y_tr = (y_train > 0).astype(int)
     y_val = (y_valid > 0).astype(int)
-    train_set = lgb.Dataset(X_tr, label=y_tr)
-    val_set = lgb.Dataset(X_val, label=y_val)
+    train_set = lgb.Dataset(x_tr, label=y_tr)
+    val_set = lgb.Dataset(x_val, label=y_val)
 
     clf = lgb.train(
         params_clf,
@@ -52,7 +49,7 @@ def train_clf(
         callbacks=[lgb.early_stopping(stopping_rounds=20)],
     )
     fold_importance_df = pd.DataFrame()
-    fold_importance_df["Feature"] = list(X_tr.columns)
+    fold_importance_df["Feature"] = list(x_tr.columns)
     fold_importance_df["importance"] = clf.feature_importance()
     fold_importance_df["importance_gain"] = clf.feature_importance(
         importance_type="gain"
@@ -62,8 +59,8 @@ def train_clf(
     )
     # fold_importance_df.to_csv(f"importance_df_clf.csv", index=None)
 
-    # print("Example of input feature matrix for classification prediction:", X_val)
-    y_pred_proba = clf.predict(X_val, num_iteration=clf.best_iteration)
+    # print("Example of input feature matrix for classification prediction:", x_val)
+    y_pred_proba = clf.predict(x_val, num_iteration=clf.best_iteration)
     # Use probability threshold for binary classification
     y_pred = (y_pred_proba > 0.5).astype(int)
 
@@ -82,14 +79,12 @@ def r2_eval(preds, train_data):
 
 
 def train_reg(
-    X_train,
-    X_valid,
+    x_train,
+    x_valid,
     y_train,
     y_valid,
-    params_reg=params_reg,
-    num_features=[],
-    cat_features=cat_features,
-    value_weighting=True,
+    config:dict,
+    value_weighting=True
 ):
     """
     Training function
@@ -97,7 +92,13 @@ def train_reg(
     - quantile: High-value quantile threshold (e.g., top 1%), which should be adjusted according to different projects.
     - weight_multiplier: Weight multiplier for high-value users.
     """
-
+    params_reg = config["params_reg"]
+    num_features = config["num_features"]
+    cat_features = config["cat_features"]
+    percentiles = config["percentiles"]
+    base_weights = config["base_weights"]
+    top_num = config["top_num"]
+    
     # Apply log1p transformation to target
     y_train_log = np.log1p(y_train)
     y_valid_log = np.log1p(y_valid)
@@ -136,13 +137,13 @@ def train_reg(
 
     # Wrap dataset
     trn_data = lgb.Dataset(
-        X_train,
+        x_train,
         label=y_train_log,
         categorical_feature=cat_features,
         weight=train_weights,
     )
     val_data = lgb.Dataset(
-        X_valid, label=y_valid_log, categorical_feature=cat_features, reference=trn_data
+        x_valid, label=y_valid_log, categorical_feature=cat_features, reference=trn_data
     )
     reg = lgb.train(
         params_reg,
@@ -166,9 +167,9 @@ def train_reg(
     )
     # fold_importance_df.to_csv(f"importance_df_reg.csv", index=None)
 
-    # print("Example of input feature matrix for regression prediction:", X_valid)
+    # print("Example of input feature matrix for regression prediction:", x_valid)
     # Predict log values
-    y_preds_log = reg.predict(X_valid, num_iteration=reg.best_iteration)
+    y_preds_log = reg.predict(x_valid, num_iteration=reg.best_iteration)
     # Restore log and correct negative values
     y_preds = pd.Series(np.expm1(y_preds_log)).clip(lower=0).values
 
@@ -181,23 +182,16 @@ def train_reg(
     return reg, result, fold_importance_df
 
 
-# Training process wrapper
-# Fixed prediction period
-# Compatible with empty validation set
 def train_process(
-    X_train_1,
-    X_valid_1,
-    X_train_2,
-    X_valid_2,
+    x_train_1,
+    x_valid_1,
+    x_train_2,
+    x_valid_2,
     y_train_1,
     y_valid_1,
     y_train_2,
     y_valid_2,
-    params_clf=params_clf,
-    params_reg=params_reg,
-    num_features=[],
-    cat_features=cat_features,
-    payer_tag=payer_tag,
+    config
 ):
     """
     The binary classification model determines future payment behavior.
@@ -205,64 +199,69 @@ def train_process(
     _1: Dataset of players who have not paid during the feature period
     _2: Dataset of players who have paid (payer) during the feature period
     """
+    params_clf = config["params_clf"]
+    params_reg = config["params_reg"]
+    num_features = config["num_features"]
+    cat_features = config["cat_features"]
+    payer_tag = config["payer_tag"]
     # Check if the validation set is empty
     # The purpose is to train only, without validation
-    only_train = any(df is None for df in [X_valid_1, X_valid_2, y_valid_1, y_valid_2])
+    only_train = any(df is None for df in [x_valid_1, x_valid_2, y_valid_1, y_valid_2])
     if only_train:
         # Construct empty DataFrames with the same structure
-        X_valid_1 = pd.DataFrame(columns=X_train_1.columns)
-        X_valid_2 = pd.DataFrame(columns=X_train_2.columns)
+        x_valid_1 = pd.DataFrame(columns=x_train_1.columns)
+        x_valid_2 = pd.DataFrame(columns=x_train_2.columns)
         y_valid_1 = pd.Series(dtype="float64")
         y_valid_2 = pd.Series(dtype="float64")
-        print("Train only, no validation")
+        # print("Train only, no validation")
 
     # Train the classification model on the dataset of players who have not paid during the feature period
     clf_valid, result_valid_clf, importance_clf = train_clf(
-        X_train_1, X_valid_1, y_train_1, y_valid_1, params_clf
+        x_train_1, x_valid_1, y_train_1, y_valid_1, params_clf
     )
 
     # Predict on dataset 1
-    existing_payer_tag = [col for col in payer_tag if col in X_train_1.columns]
+    existing_payer_tag = [col for col in payer_tag if col in x_train_1.columns]
     if not existing_payer_tag:
         raise ValueError(
-            "None of the payer_tag columns are present in X, unable to identify unpaid users."
+            "None of the payer_tag columns are present in x, unable to identify unpaid users."
         )
-    temp = clf_valid.predict(X_train_1.drop(columns=existing_payer_tag))
+    temp = clf_valid.predict(x_train_1.drop(columns=existing_payer_tag))
 
     # Create deep copy
-    X_train_1_copy = X_train_1.copy()
-    X_train_1_copy["pay_class_pred"] = (temp > 0.5).astype(int)
+    x_train_1_copy = x_train_1.copy()
+    x_train_1_copy["pay_class_pred"] = (temp > 0.5).astype(int)
 
-    # eval(f"X_train_day{day}_1")['pay_class_pred'] = (temp > 0.5).astype(int)
-    # print(eval(f"X_train_day{day}_1").drop(columns=existing_payer_tag).head())
+    # eval(f"x_train_day{day}_1")['pay_class_pred'] = (temp > 0.5).astype(int)
+    # print(eval(f"x_train_day{day}_1").drop(columns=existing_payer_tag).head())
 
     # Create deep copy
-    X_valid_1_copy = X_valid_1.copy()
-    if not X_valid_1.empty:
-        temp = clf_valid.predict(X_valid_1.drop(columns=existing_payer_tag))
-        X_valid_1_copy["pay_class_pred"] = (temp > 0.5).astype(int)
+    x_valid_1_copy = x_valid_1.copy()
+    if not x_valid_1.empty:
+        temp = clf_valid.predict(x_valid_1.drop(columns=existing_payer_tag))
+        x_valid_1_copy["pay_class_pred"] = (temp > 0.5).astype(int)
     else:
-        X_valid_1_copy["pay_class_pred"] = pd.Series(dtype="int")
-    # eval(f"X_valid_day{day}_1")['pay_class_pred'] = (temp > 0.5).astype(int)
+        x_valid_1_copy["pay_class_pred"] = pd.Series(dtype="int")
+    # eval(f"x_valid_day{day}_1")['pay_class_pred'] = (temp > 0.5).astype(int)
 
     # Filter data
-    mask_payfu_1 = X_train_1_copy["pay_class_pred"] == 1
-    mask_payfu_2 = X_valid_1_copy["pay_class_pred"] == 1
+    mask_payfu_1 = x_train_1_copy["pay_class_pred"] == 1
+    mask_payfu_2 = x_valid_1_copy["pay_class_pred"] == 1
 
     # Concatenate data
-    X_combined_train = pd.concat(
-        [X_train_1_copy[mask_payfu_1].drop(columns="pay_class_pred"), X_train_2], axis=0
+    x_combined_train = pd.concat(
+        [x_train_1_copy[mask_payfu_1].drop(columns="pay_class_pred"), x_train_2], axis=0
     )
     y_combined_train = pd.concat([y_train_1[mask_payfu_1], y_train_2], axis=0)
 
-    X_combined_valid = pd.concat(
-        [X_valid_1_copy[mask_payfu_2].drop(columns="pay_class_pred"), X_valid_2], axis=0
+    x_combined_valid = pd.concat(
+        [x_valid_1_copy[mask_payfu_2].drop(columns="pay_class_pred"), x_valid_2], axis=0
     )
     y_combined_valid = pd.concat([y_valid_1[mask_payfu_2], y_valid_2], axis=0)
 
     reg_valid, result_valid_reg, importance_reg = train_reg(
-        X_combined_train,
-        X_combined_valid,
+        x_combined_train,
+        x_combined_valid,
         y_combined_train,
         y_combined_valid,
         params_reg,
