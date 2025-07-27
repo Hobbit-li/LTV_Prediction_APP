@@ -1,8 +1,11 @@
-# visualization
-# plot
-# model evaluate
+"""
+Visualization Module
 
-# existing life cycles for valid
+Provides visualization tools for model evaluation including:
+- Performance comparison plots
+- LTV evaluation charts
+- Residual analysis plots
+"""
 
 import matplotlib.pyplot as plt
 from sklearn.metrics import (
@@ -12,18 +15,14 @@ from sklearn.metrics import (
     r2_score,
 )
 
-from config_loader import load_config
 
-config = load_config()
-days_list_existed = config["days_list_existed"]
-
-
-def compara_plot(preds_results, days_list_existed=days_list_existed):
+def compara_plot(preds_results, config):
     """
     Objective: show the actual and the predicted LTV increasingly
     days_list_existed: have existed days for valid
     preds_results: the predicted results by running the trained model
     """
+    days_list_existed = config["days_list_existed"]
     for day in days_list_existed:
         plt.figure(figsize=(20, 6))
         result_df_sorted = (
@@ -48,14 +47,14 @@ def compara_plot(preds_results, days_list_existed=days_list_existed):
 
 
 # Indicator evaluation
-def evaluate_ltv(preds_results, days_list_existed=days_list_existed):
+def evaluate_ltv(preds_results, config):
     """
     return RMSE, MAE, MSLE, R2
     user sample
     days_list_existed: have existed days for valid
     preds_results: the predicted results by running the trained model
     """
-
+    days_list_existed = config["days_list_existed"]
     eval_dict = {}
     for day in days_list_existed:
         y_true = preds_results[day]["actual"].values
@@ -75,12 +74,13 @@ def evaluate_ltv(preds_results, days_list_existed=days_list_existed):
 
 
 # Residual analysis
-def residual_plot(preds_results, days_list_existed=days_list_existed):
+def residual_plot(preds_results, config):
     """
     Objective: show the residuals of LTV
     days_list_existed: have existed days for valid
     preds_results: the predicted results by running the trained model
     """
+    days_list_existed = config["days_list_existed"]
     for day in days_list_existed:
         residuals = (
             preds_results[day]["pred"].values - preds_results[day]["actual"].values
