@@ -1,4 +1,5 @@
 import pandas as pd
+
 # from config_loader import load_config
 from sklearn.model_selection import train_test_split
 
@@ -14,31 +15,27 @@ Contains helper functions for data processing:
 """
 
 
-def data_preprocess(
-    df,
-    config:dict,
-    train_data=True
-):
+def data_preprocess(df, config: dict, train_data=True):
     """
     Preprocess data and split into payer/non-payer groups for each prediction day.
-    
+
     Args:
         df: Input DataFrame with features and targets
         train_data: If True, split data into train/valid sets (default True)
         config: Dict containing:
             - payer_tag: Payer indicator column
-            - num_features/cat_features: Numerical/categorical feature names  
+            - num_features/cat_features: Numerical/categorical feature names
             - target_col: Target column names
-            - id_col: User ID column  
+            - id_col: User ID column
             - days_list: Prediction days to process
             - num_features_map: Features for each day
-    
+
     Returns:
         Dict with 'train'/'valid' keys, each containing day-wise splits:
         {
             day: {
                 "all": (features, target),
-                "nonpayer": (features, target), 
+                "nonpayer": (features, target),
                 "payer": (features, target)
             }
         }
@@ -51,7 +48,6 @@ def data_preprocess(
     id_col = config["id_col"]
     days_list = config["days_list"]
     num_features_map = config["num_features_map"]
-
 
     X = df[num_features + cat_features]
     y = dfconfig[target_col]
@@ -106,10 +102,10 @@ def data_preprocess(
     return result
 
 
-def paid_split(X, y, config:dict):
+def paid_split(X, y, config: dict):
     """
     Split data into payer/non-payer subsets
-    
+
     Args:
         data (pd.DataFrame): Input dataset
         payer_tag (str): Column name indicating payer status
@@ -119,7 +115,7 @@ def paid_split(X, y, config:dict):
         target_col (str): Target variable name
         id_col (str): Identifier column name
         num_features_map (dict): Numerical feature metadata
-        
+
     Returns:
         tuple: Split datasets
     """
