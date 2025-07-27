@@ -1,33 +1,57 @@
 import pandas as pd
-from config_loader import load_config
+# from config_loader import load_config
 from sklearn.model_selection import train_test_split
 
-config = load_config()
+# config = load_config()
 
-payer_tag = config["payer_tag"]
-num_features = config["num_features"]
-cat_features = config["cat_features"]
-target_col = config["target_col"]
-id_col = config["id_col"]
-days_list = config["days_list"]
-num_features_map = config["num_features_map"]
+"""
+Data Utilities Module
+
+Contains helper functions for data processing:
+- Data splitting
+- Feature engineering
+- Preprocessing pipelines
+"""
 
 
 def data_preprocess(
     df,
     train_data=True,
-    num_features=num_features,
-    cat_features=cat_features,
-    target_col=target_col,
-    id_col=id_col,
-    days_list=days_list,
-    num_features_map=num_features_map,
-    payer_tag=payer_tag,
+    config: dict
 ):
     """
-    After load the original data
-    split it into different life cycles
+    Preprocess data and split into payer/non-payer groups for each prediction day.
+    
+    Args:
+        df: Input DataFrame with features and targets
+        train_data: If True, split data into train/valid sets (default True)
+        config: Dict containing:
+            - payer_tag: Payer indicator column
+            - num_features/cat_features: Numerical/categorical feature names  
+            - target_col: Target column names
+            - id_col: User ID column  
+            - days_list: Prediction days to process
+            - num_features_map: Features for each day
+    
+    Returns:
+        Dict with 'train'/'valid' keys, each containing day-wise splits:
+        {
+            day: {
+                "all": (features, target),
+                "nonpayer": (features, target), 
+                "payer": (features, target)
+            }
+        }
     """
+
+    payer_tag = config["payer_tag"]
+    num_features = config["num_features"]
+    cat_features = config["cat_features"]
+    target_col = config["target_col"]
+    id_col = config["id_col"]
+    days_list = config["days_list"]
+    num_features_map = config["num_features_map"]
+
 
     X = df[num_features + cat_features]
     y = dfconfig[target_col]
@@ -82,16 +106,29 @@ def data_preprocess(
     return result
 
 
-def paid_split(X, y, payer_tag=payer_tag):
+def paid_split(X, y, config:dict):
     """
-    split the users
-    set 1: HAVE Unpaid until the current period
-    set 2: HAVE Paid until the peroid
+    Split data into payer/non-payer subsets
+    
+    Args:
+        data (pd.DataFrame): Input dataset
+        payer_tag (str): Column name indicating payer status
+        days_list (list): Time periods for analysis
+        num_features (list): Numerical features
+        cat_features (list): Categorical features
+        target_col (str): Target variable name
+        id_col (str): Identifier column name
+        num_features_map (dict): Numerical feature metadata
+        
+    Returns:
+        tuple: Split datasets
     """
+    payer_tag = config["payer_tag"]
+
     existing_payer_tag = [col for col in payer_tag if col in X.columns]
     if not existing_payer_tag:
         raise ValueError(
-            "❌ None of the payer_tag columns are present in X, unable to identify unpaid users."
+            "=None of the payer_tag columns are present in X, unable to identify unpaid users."
         )
 
     # Unpaid samples during the feature period (Set 1)
