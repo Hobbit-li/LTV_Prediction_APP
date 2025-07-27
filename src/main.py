@@ -11,27 +11,6 @@ Orchestrates the full model pipeline:
 # from IPython.display import Image
 # Image("/kaggle/input/process-image/deepseek_mermaid_20250613_79aa76.png", width=500)
 # import necessary packages
-import gc
-import logging
-import os
-import warnings
-from typing import Any, Dict, Optional, Tuple
-
-import lightgbm as lgb
-import numpy as np
-import pandas as pd
-from lightgbm import LGBMClassifier
-from sklearn.metrics import (
-    classification_report,
-    mean_absolute_error,
-    mean_squared_error,
-    mean_squared_log_error,
-    r2_score,
-    roc_auc_score,
-)
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from tqdm.auto import tqdm
 
 # Local application/library specific imports
 from config_loader import load_config
@@ -76,9 +55,6 @@ def main():
 
     # store the all splited datesets
     temp_result = data_preprocess(df)
-
-    params_clf = config["params_clf"]
-    params_reg = config["params_reg"]
 
     # train process 
     model_results = {}
@@ -152,7 +128,7 @@ def main():
     compare_plot(preds_results)
     re_dict = {}
     re_dict = evaluate_ltv(preds_results)
-    compara_plot(preds_results)
+    compare_plot(preds_results)
     roas_results = show_roas_ltv(preds_results)
 
 
