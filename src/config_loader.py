@@ -1,8 +1,10 @@
 # src/config_loader.py
 import yaml
 
-"""Module for loading and managing configuration files in YAML format."""
-
+"""
+Module for loading and validating YAML configuration files.
+Handles configuration loading and structural validation.
+"""
 
 def load_config(path="config.yaml"):
     """
@@ -19,7 +21,7 @@ def load_config(path="config.yaml"):
         yaml.YAMLError: If YAML parsing fails
 
     """
-    with open(path, "r") as f:
+    with open(path, "r", encoding='utf-8') as f:
         return yaml.safe_load(f)
 
 
@@ -47,7 +49,6 @@ def validate_config(config: dict) -> bool:
         "cat_features",
         "target_col",
         "id_col",
-        "days_list",
         "num_features_map",
         "params_clf",
         "params_reg",
