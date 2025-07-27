@@ -6,6 +6,7 @@ Module for loading and validating YAML configuration files.
 Handles configuration loading and structural validation.
 """
 
+
 def load_config(path="config.yaml"):
     """
     Load configuration from a YAML file.
@@ -21,7 +22,7 @@ def load_config(path="config.yaml"):
         yaml.YAMLError: If YAML parsing fails
 
     """
-    with open(path, "r", encoding='utf-8') as f:
+    with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
