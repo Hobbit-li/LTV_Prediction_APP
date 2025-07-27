@@ -7,7 +7,7 @@ Contains helper functions for data processing:
 - Preprocessing pipelines
 """
 
-import pandas as pd
+# import pandas as pd
 # from config_loader import load_configf
 from sklearn.model_selection import train_test_split
 # config = load_config()
@@ -86,13 +86,13 @@ def data_preprocess(df, config: dict, train_data=True):
 
         # Store all sets in dict
         result["train"][day] = {
-            "all": (x_train_day, y_train_day),
+            "all": (x_train_day, y_train_day, id_train),
             "nonpayer": (x_train_day_1, y_train_day_1),
             "payer": (x_train_day_2, y_train_day_2),
         }
 
         result["valid"][day] = {
-            "all": (x_valid_day, y_valid_day),
+            "all": (x_valid_day, y_valid_day, id_valid),
             "nonpayer": (x_valid_day_1, y_valid_day_1),
             "payer": (x_valid_day_2, y_valid_day_2),
         }
