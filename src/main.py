@@ -62,16 +62,16 @@ def main():
     # train process
     model_results = {}
     for day in days_list:
-        X_train_nonpayer, y_train_nonpayer = temp_result["train"][day]["nonpayer"]
-        X_train_payer, y_train_payer = temp_result["train"][day]["payer"]
-        X_valid_nonpayer, y_valid_nonpayer = temp_result["valid"][day]["nonpayer"]
-        X_valid_payer, y_valid_payer = temp_result["valid"][day]["payer"]
+        x_train_nonpayer, y_train_nonpayer = temp_result["train"][day]["nonpayer"]
+        x_train_payer, y_train_payer = temp_result["train"][day]["payer"]
+        x_valid_nonpayer, y_valid_nonpayer = temp_result["valid"][day]["nonpayer"]
+        x_valid_payer, y_valid_payer = temp_result["valid"][day]["payer"]
         # day_features = num_features_map[day]
         model_results[day] = train_process(
-            X_train_nonpayer,
-            X_valid_nonpayer,
-            X_train_payer,
-            X_valid_payer,
+            x_train_nonpayer,
+            x_valid_nonpayer,
+            x_train_payer,
+            x_valid_payer,
             y_train_nonpayer,
             y_valid_nonpayer,
             y_train_payer,
@@ -86,12 +86,12 @@ def main():
         params_clf["num_iterations"] = res["model_clf"].best_iteration
         params_reg["num_iterations"] = res["model_reg"].best_iteration
 
-        X_clf, y_clf = temp_result["valid"][day]["nonpayer"]
+        x_clf, y_clf = temp_result["valid"][day]["nonpayer"]
 
-        X_reg, y_reg = temp_result["valid"][day]["payer"]
+        x_reg, y_reg = temp_result["valid"][day]["payer"]
 
         model_test[day] = train_process(
-            X_clf, X_clf, X_reg, X_reg, y_clf, y_clf, y_reg, y_reg, config
+            x_clf, x_clf, x_reg, x_reg, y_clf, y_clf, y_reg, y_reg, config
         )
 
     # load the test data
@@ -103,12 +103,12 @@ def main():
 
     preds_results = {}
     for day in days_list:
-        X_test_nonpayer, y_test_nonpayer = temp_result_test["train"][day]["nonpayer"]
-        X_test_payer, y_test_payer = temp_result_test["train"][day]["payer"]
+        x_test_nonpayer, y_test_nonpayer = temp_result_test["train"][day]["nonpayer"]
+        x_test_payer, y_test_payer = temp_result_test["train"][day]["payer"]
 
         preds_results[day] = predict_process(
-            X_test_nonpayer,
-            X_test_payer,
+            x_test_nonpayer,
+            x_test_payer,
             y_test_nonpayer,
             y_test_payer,
             model_test[day]["model_clf"],
