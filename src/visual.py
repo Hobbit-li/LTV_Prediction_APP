@@ -16,7 +16,7 @@ from sklearn.metrics import (
 )
 
 
-def compara_plot(preds_results, config):
+def compare_plot(preds_results, config):
     """
     Objective: show the actual and the predicted LTV increasingly
     days_list_existed: have existed days for valid
