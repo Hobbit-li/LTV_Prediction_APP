@@ -11,7 +11,8 @@ Orchestrates the full model pipeline:
 # from IPython.display import Image
 # Image("/kaggle/input/process-image/deepseek_mermaid_20250613_79aa76.png", width=500)
 # import necessary packages
-
+import pandas as pd
+import logging
 # Local application/library specific imports
 from config_loader import load_config
 from data_utils import data_preprocess
@@ -42,7 +43,7 @@ def main():
     # params load
     config = load_config()
     # load the historical referrence data
-    path_ref = config("path_ref")
+    path_ref = config["path_ref"]
     df = pd.read_csv(path_ref)
     df.fillna(0, inplace=True)
 
@@ -58,7 +59,7 @@ def main():
 
     # store the all splited datesets
     temp_result = data_preprocess(df)
-
+    days_list = config["days_list"]
     # train process
     model_results = {}
     for day in days_list:
@@ -81,6 +82,8 @@ def main():
 
     # retrain the model using valid data
     model_test = {}
+    params_clf = config["params_clf"]
+    params_reg = config["params_reg"]
 
     for day, res in model_results.items():
         params_clf["num_iterations"] = res["model_clf"].best_iteration
@@ -95,7 +98,7 @@ def main():
         )
 
     # load the test data
-    path = config["path_pre"]
+    path_pre = config["path_pre"]
     test_df = pd.read_csv(path_pre)
     test_df.fillna(0, inplace=True)
 
