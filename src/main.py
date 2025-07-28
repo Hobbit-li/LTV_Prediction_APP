@@ -18,6 +18,7 @@ from data_utils import data_preprocess
 from predict import predict_process
 from results_show import show_roas_ltv
 from train import train_process
+
 # from utils_io import create_output_dir, save_metrics, save_model, save_predictions
 from utils_io import create_output_dir, save_predictions
 from visual import compare_plot, evaluate_ltv, residual_plot
@@ -75,7 +76,7 @@ def main():
             y_valid_nonpayer,
             y_train_payer,
             y_valid_payer,
-            config
+            config,
         )
 
     # retrain the model using valid data
@@ -119,14 +120,13 @@ def main():
         # )
     save_predictions(preds_results, create_output_dir())
 
-    
     compare_plot(preds_results, config)
     re_dict = {}
     re_dict = evaluate_ltv(preds_results, config)
     compare_plot(preds_results, config)
     roas_results = show_roas_ltv(preds_results, config)
     residual_plot(preds_results, config)
-    
+
 
 if __name__ == "__main__":
     main()
