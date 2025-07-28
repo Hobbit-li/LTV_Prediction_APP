@@ -2,6 +2,7 @@
 Model Training Module
 Contains functions for training classifier and regressor models
 """
+
 import pandas as pd
 import numpy as np
 import lightgbm as lgb
@@ -13,13 +14,8 @@ from sklearn.metrics import (
     r2_score,
 )
 
-def train_clf(
-    x_train, 
-    x_valid, 
-    y_train, 
-    y_valid, 
-    config
-):
+
+def train_clf(x_train, x_valid, y_train, y_valid, config):
     """
     Dataset: Users who have not paid during the feature period
     Binary classification: Predict whether a breakthrough payment will occur in the subsequent period, 0/1
@@ -78,14 +74,7 @@ def r2_eval(preds, train_data):
     return "r2", r2_score(labels, preds), True
 
 
-def train_reg(
-    x_train,
-    x_valid,
-    y_train,
-    y_valid,
-    config:dict,
-    value_weighting=True
-):
+def train_reg(x_train, x_valid, y_train, y_valid, config: dict, value_weighting=True):
     """
     Training function
     - value_weighting: Whether to apply weights for high-value users. If weighting is needed, set this parameter to True.
@@ -98,7 +87,7 @@ def train_reg(
     percentiles = config["percentiles"]
     base_weights = config["base_weights"]
     top_num = config["top_num"]
-    
+
     # Apply log1p transformation to target
     y_train_log = np.log1p(y_train)
     y_valid_log = np.log1p(y_valid)
@@ -191,7 +180,7 @@ def train_process(
     y_valid_1,
     y_train_2,
     y_valid_2,
-    config
+    config,
 ):
     """
     The binary classification model determines future payment behavior.

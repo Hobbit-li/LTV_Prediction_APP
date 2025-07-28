@@ -21,10 +21,11 @@ from train import train_process
 from utils_io import create_output_dir, save_metrics, save_model, save_predictions
 from visual import compare_plot, evaluate_ltv, residual_plot
 
+
 def main():
     """
     Execute end-to-end model workflow
-    
+
     Steps:
     1. Load configuration
     2. Preprocess data
@@ -56,7 +57,7 @@ def main():
     # store the all splited datesets
     temp_result = data_preprocess(df)
 
-    # train process 
+    # train process
     model_results = {}
     for day in days_list:
         X_train_nonpayer, y_train_nonpayer = temp_result["train"][day]["nonpayer"]
@@ -73,7 +74,7 @@ def main():
             y_valid_nonpayer,
             y_train_payer,
             y_valid_payer,
-            config
+            config,
         )
 
     # retrain the model using valid data
@@ -88,15 +89,7 @@ def main():
         X_reg, y_reg = temp_result["valid"][day]["payer"]
 
         model_test[day] = train_process(
-            X_clf,
-            X_clf,
-            X_reg,
-            X_reg,
-            y_clf,
-            y_clf,
-            y_reg,
-            y_reg,
-            config
+            X_clf, X_clf, X_reg, X_reg, y_clf, y_clf, y_reg, y_reg, config
         )
 
     # load the test data

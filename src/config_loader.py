@@ -2,7 +2,9 @@
 Module for loading and validating YAML configuration files.
 Handles configuration loading and structural validation.
 """
+
 import yaml
+
 
 def load_config(path="config.yaml"):
     """
