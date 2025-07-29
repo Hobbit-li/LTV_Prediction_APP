@@ -4,8 +4,7 @@ Handles configuration loading and structural validation.
 """
 
 import yaml
-
-
+import os
 def load_config():
     """
     Load configuration from a YAML file.
