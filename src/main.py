@@ -121,7 +121,7 @@ def main():
             id_test,
             model_test[day]["model_clf"],
             model_test[day]["model_reg"],
-            config
+            config,
         )
         # print(preds_results[day].head())
         # preds_results[day].to_csv(
