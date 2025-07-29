@@ -229,7 +229,7 @@ def train_process(
 
     # Train the classification model on the dataset of players who have not paid during the feature period
     clf_valid, result_valid_clf, importance_clf = train_clf(
-        x_train_1, x_valid_1, y_train_1, y_valid_1, params_clf
+        x_train_1, x_valid_1, y_train_1, y_valid_1, config
     )
 
     # Predict on dataset 1
@@ -276,9 +276,7 @@ def train_process(
         x_combined_valid,
         y_combined_train,
         y_combined_valid,
-        params_reg,
-        num_features,
-        cat_features,
+        config
     )
     model_result = {
         "model_clf": clf_valid,
