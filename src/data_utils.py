@@ -40,7 +40,6 @@ def data_preprocess(df, config: dict, train_data=True):
         }
     """
 
-    payer_tag = config["payer_tag"]
     num_features = config["num_features"]
     cat_features = config["cat_features"]
     target_col = config["target_col"]
