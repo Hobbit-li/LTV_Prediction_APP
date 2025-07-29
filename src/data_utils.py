@@ -80,10 +80,10 @@ def data_preprocess(df, config: dict, train_data=True):
 
         # Split into payer vs non-payer
         x_train_day_1, x_train_day_2, y_train_day_1, y_train_day_2 = paid_split(
-            x_train_day, y_train_day, payer_tag
+            x_train_day, y_train_day, config
         )
         x_valid_day_1, x_valid_day_2, y_valid_day_1, y_valid_day_2 = paid_split(
-            x_valid_day, y_valid_day, payer_tag
+            x_valid_day, y_valid_day, config
         )
 
         # Store all sets in dict
