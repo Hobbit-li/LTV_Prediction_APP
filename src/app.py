@@ -49,7 +49,7 @@ if ref_file and pred_file and st.button("🚀 开始训练与预测"):
                 y_valid_nonpayer,
                 y_train_payer,
                 y_valid_payer,
-                config
+                config,
             )
 
     with st.spinner("使用验证集重新训练中..."):
@@ -85,7 +85,7 @@ if ref_file and pred_file and st.button("🚀 开始训练与预测"):
                 id_test,
                 model_test[day]["model_clf"],
                 model_test[day]["model_reg"],
-                config
+                config,
             )
 
     st.success("✅ 模型预测完成！")
