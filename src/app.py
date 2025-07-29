@@ -37,6 +37,8 @@ try:
 
             temp_result = data_preprocess(df_ref, config)
             temp_result_pred = data_preprocess(df_pred, config, train_data=False)
+            st.write("✅ 脚本已加载，无语法错误")
+
 
         with st.spinner("训练模型中..."):
             model_results = {}
