@@ -11,8 +11,10 @@ Orchestrates the full model pipeline:
 # from IPython.display import Image
 # Image("/kaggle/input/process-image/deepseek_mermaid_20250613_79aa76.png", width=500)
 # import necessary packages
-import pandas as pd
 import logging
+import warnings
+import pandas as pd
+
 
 # Local application/library specific imports
 from config_loader import load_config
@@ -22,7 +24,7 @@ from results_show import show_roas_ltv
 from train import train_process
 
 # from utils_io import create_output_dir, save_metrics, save_model, save_predictions
-from utils_io import create_output_dir, save_predictions
+from utils_io import create_output_dir, save_metrics, save_predictions
 from visual import compare_plot, evaluate_ltv, residual_plot
 
 
@@ -127,8 +129,10 @@ def main():
     compare_plot(preds_results, config)
     re_dict = {}
     re_dict = evaluate_ltv(preds_results, config)
+    save_metrics(re_dict, create_output_dir())
     compare_plot(preds_results, config)
     roas_results = show_roas_ltv(preds_results, config)
+    save_metrics(roas_results, create_output_dir())
     residual_plot(preds_results, config)
 
 
