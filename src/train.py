@@ -2,6 +2,7 @@
 Model Training Module
 Contains functions for training classifier and regressor models
 """
+
 import logging
 import pandas as pd
 import numpy as np
@@ -10,17 +11,17 @@ from sklearn.metrics import (
     classification_report,
     roc_auc_score,
     mean_squared_log_error,
-    r2_score
+    r2_score,
 )
 
 
 def train_clf(x_train, x_valid, y_train, y_valid, config):
     """
-    Dataset: 
+    Dataset:
     - Users who have not paid during the feature period
-    Binary classification: 
+    Binary classification:
     - Predict whether a breakthrough payment will occur in the subsequent period
-    return: 
+    return:
     - Model and model performance evaluation
     """
     payer_tag = config["payer_tag"]
@@ -74,14 +75,14 @@ def train_clf(x_train, x_valid, y_train, y_valid, config):
 def r2_eval(preds, train_data):
     """
     Custom evaluation function to calculate R-squared (coefficient of determination) metric.
-    
+
     Parameters:
     -----------
     preds : array-like
         The predicted values from the model.
     train_data : lightgbm.Dataset
         The training dataset object containing the true labels.
-        
+
     Returns:
     --------
     tuple
@@ -202,7 +203,7 @@ def train_process(
     y_valid_1,
     y_train_2,
     y_valid_2,
-    config
+    config,
 ):
     """
     The binary classification model determines future payment behavior.
