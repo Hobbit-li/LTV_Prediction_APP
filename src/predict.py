@@ -6,6 +6,7 @@ This module handles the prediction pipeline for the LTV model, including:
 - Generating predictions from classifier and regressor
 - Combining results into final LTV predictions
 """
+
 import pandas as pd
 import numpy as np
 
