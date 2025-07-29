@@ -9,4 +9,3 @@ joblib
 matplotlib
 black
 pylint
-traceback
