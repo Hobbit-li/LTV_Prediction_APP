@@ -34,8 +34,9 @@ try:
             df_pred = pd.read_csv(pred_file).fillna(0)
             st.dataframe(df_ref.head())
             st.dataframe(df_pred.head())
-
+            st.write("准备开始处理训练数据")
             temp_result = data_preprocess(df_ref, config)
+            st.write("✅ 脚本已加载，无语法错误")
             temp_result_pred = data_preprocess(df_pred, config, train_data=False)
             st.write("✅ 脚本已加载，无语法错误")
 
