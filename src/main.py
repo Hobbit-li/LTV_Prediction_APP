@@ -109,7 +109,7 @@ def main():
 
     preds_results = {}
     for day in days_list:
-        -, -, id_test = temp_result_test["train"][day]["all"]
+        _, _, id_test = temp_result_test["train"][day]["all"]
         x_test_nonpayer, y_test_nonpayer = temp_result_test["train"][day]["nonpayer"]
         x_test_payer, y_test_payer = temp_result_test["train"][day]["payer"]
 
