@@ -1,3 +1,4 @@
+os
 streamlit
 numpy
 pandas
@@ -9,3 +10,4 @@ logging
 pylint
 black
 matplotlib
+warnings
