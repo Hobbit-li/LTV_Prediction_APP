@@ -52,9 +52,9 @@ def save_metrics(metrics_dict, output_dir):
         metrics_dict (dict): Dictionary containing evaluation metrics
         output_dir (str): Path to the directory where metrics files will be saved
     """
-    json_path = os.path.join(output_dir, "metrics.json")
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(metrics_dict, f, indent=2)
+    # json_path = os.path.join(output_dir, "metrics.json")
+    # with open(json_path, "w", encoding="utf-8") as f:
+    #     json.dump(metrics_dict, f, indent=2)
 
     # optional csv
     pd.DataFrame.from_dict(metrics_dict, orient="index").to_csv(
