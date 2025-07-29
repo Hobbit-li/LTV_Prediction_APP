@@ -41,11 +41,15 @@ if ref_file and pred_file and st.button("🚀 开始训练与预测"):
             x_valid_payer, y_valid_payer = temp_result["valid"][day]["payer"]
 
             model_results[day] = train_process(
-                x_train_nonpayer, x_valid_nonpayer,
-                x_train_payer, x_valid_payer,
-                y_train_nonpayer, y_valid_nonpayer,
-                y_train_payer, y_valid_payer,
-                config
+                x_train_nonpayer,
+                x_valid_nonpayer,
+                x_train_payer,
+                x_valid_payer,
+                y_train_nonpayer,
+                y_valid_nonpayer,
+                y_train_payer,
+                y_valid_payer,
+                config,
             )
 
     with st.spinner("使用验证集重新训练中..."):
@@ -61,16 +65,16 @@ if ref_file and pred_file and st.button("🚀 开始训练与预测"):
             x_reg, y_reg = temp_result["valid"][day]["payer"]
 
             model_test[day] = train_process(
-                x_clf, x_clf, x_reg, x_reg,
-                y_clf, y_clf, y_reg, y_reg,
-                config
+                x_clf, x_clf, x_reg, x_reg, y_clf, y_clf, y_reg, y_reg, config
             )
 
     with st.spinner("生成预测中..."):
         preds_results = {}
         for day in days_list:
             _, _, id_test = temp_result_pred["train"][day]["all"]
-            x_test_nonpayer, y_test_nonpayer = temp_result_pred["train"][day]["nonpayer"]
+            x_test_nonpayer, y_test_nonpayer = temp_result_pred["train"][day][
+                "nonpayer"
+            ]
             x_test_payer, y_test_payer = temp_result_pred["train"][day]["payer"]
 
             preds_results[day] = predict_process(
@@ -81,7 +85,7 @@ if ref_file and pred_file and st.button("🚀 开始训练与预测"):
                 id_test,
                 model_test[day]["model_clf"],
                 model_test[day]["model_reg"],
-                config
+                config,
             )
 
     st.success("✅ 模型预测完成！")
