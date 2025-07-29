@@ -32,6 +32,8 @@ try:
         with st.spinner("数据加载与预处理中..."):
             df_ref = pd.read_csv(ref_file).fillna(0)
             df_pred = pd.read_csv(pred_file).fillna(0)
+            st.dataframe(df_ref.head())
+            st.dataframe(df_pred.head())
 
             temp_result = data_preprocess(df_ref, config)
             temp_result_pred = data_preprocess(df_pred, config, train_data=False)
