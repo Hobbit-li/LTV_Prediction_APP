@@ -24,7 +24,7 @@ def load_config():
     """
     base_dir = os.path.dirname(os.path.dirname(__file__))  # 返回到项目根目录
     config_path = os.path.join(base_dir, "config", "config.yaml")
-    with open(path, "r", encoding="utf-8") as f:
+    with open(config_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
