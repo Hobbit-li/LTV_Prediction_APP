@@ -41,6 +41,38 @@ payer_tag:
 
 # Categorical features
 cat_features: [countrytype, os, source, install_device, social_type]
+num_features: 
+    - first_duration
+    - d0_duration
+    - active_in3days
+    - avg_dur3days
+    - d0_usd
+    - pay_in3days
+    - avg_usd3days
+    - active_in7days
+    - avg_dur7days
+    - pay_in7days
+    - avg_usd7days
+    - active_in30days
+    - avg_dur30days
+    - pay_in30days
+    - avg_usd30days
+    - active_in2month
+    - avg_dur2month
+    - pay_in2month
+    - avg_usd2month
+    - active_in3month
+    - avg_dur3month
+    - pay_in3month
+    - avg_usd3month
+    - active_in4month
+    - avg_dur4month
+    - pay_in4month
+    - avg_usd4month
+    - active_in5months
+    - avg_dur5months
+    - pay_in5months
+    - avg_usd5months
 
 # Target columns (multi-output)
 target_col: 
