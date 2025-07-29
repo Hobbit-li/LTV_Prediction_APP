@@ -61,7 +61,7 @@ def main():
     # df.head()
 
     # store the all splited datesets
-    temp_result = data_preprocess(df)
+    temp_result = data_preprocess(df, config)
     days_list = config["days_list"]
     # train process
     model_results = {}
@@ -105,10 +105,11 @@ def main():
     test_df = pd.read_csv(path_pre)
     test_df.fillna(0, inplace=True)
 
-    temp_result_test = data_preprocess(test_df, train_data=False)
+    temp_result_test = data_preprocess(test_df, config, train_data=False)
 
     preds_results = {}
     for day in days_list:
+        -, -, id_test = temp_result_test["train"][day]["all"]
         x_test_nonpayer, y_test_nonpayer = temp_result_test["train"][day]["nonpayer"]
         x_test_payer, y_test_payer = temp_result_test["train"][day]["payer"]
 
@@ -117,8 +118,10 @@ def main():
             x_test_payer,
             y_test_nonpayer,
             y_test_payer,
+            id_test,
             model_test[day]["model_clf"],
             model_test[day]["model_reg"],
+            config
         )
         # print(preds_results[day].head())
         # preds_results[day].to_csv(
