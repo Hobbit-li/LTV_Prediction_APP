@@ -272,11 +272,7 @@ def train_process(
     y_combined_valid = pd.concat([y_valid_1[mask_payfu_2], y_valid_2], axis=0)
 
     reg_valid, result_valid_reg, importance_reg = train_reg(
-        x_combined_train,
-        x_combined_valid,
-        y_combined_train,
-        y_combined_valid,
-        config
+        x_combined_train, x_combined_valid, y_combined_train, y_combined_valid, config
     )
     model_result = {
         "model_clf": clf_valid,
