@@ -1,4 +1,5 @@
 import streamlit as st
+import traceback
 import pandas as pd
 from config_loader import load_config
 from data_utils import data_preprocess
@@ -56,6 +57,7 @@ try:
                     y_valid_payer,
                     config,
                 )
+                st.write("✅ 脚本已加载，无语法错误")
 
         with st.spinner("使用验证集重新训练中..."):
             model_test = {}
@@ -72,6 +74,7 @@ try:
                 model_test[day] = train_process(
                     x_clf, x_clf, x_reg, x_reg, y_clf, y_clf, y_reg, y_reg, config
                 )
+                st.write("✅ 脚本已加载，无语法错误")
 
         with st.spinner("生成预测中..."):
             preds_results = {}
