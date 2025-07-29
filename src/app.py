@@ -29,8 +29,8 @@ if ref_file and pred_file and st.button("🚀 开始训练与预测"):
         df_ref = pd.read_csv(ref_file).fillna(0)
         df_pred = pd.read_csv(pred_file).fillna(0)
 
-        temp_result = data_preprocess(df_ref)
-        temp_result_pred = data_preprocess(df_pred, train_data=False)
+        temp_result = data_preprocess(df_ref, config)
+        temp_result_pred = data_preprocess(df_pred, config, train_data=False)
 
     with st.spinner("训练模型中..."):
         model_results = {}
@@ -49,7 +49,7 @@ if ref_file and pred_file and st.button("🚀 开始训练与预测"):
                 y_valid_nonpayer,
                 y_train_payer,
                 y_valid_payer,
-                config,
+                config
             )
 
     with st.spinner("使用验证集重新训练中..."):
@@ -85,7 +85,7 @@ if ref_file and pred_file and st.button("🚀 开始训练与预测"):
                 id_test,
                 model_test[day]["model_clf"],
                 model_test[day]["model_reg"],
-                config,
+                config
             )
 
     st.success("✅ 模型预测完成！")
