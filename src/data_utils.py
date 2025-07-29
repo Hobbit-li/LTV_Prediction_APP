@@ -49,7 +49,7 @@ def data_preprocess(df, config: dict, train_data=True):
     num_features_map = config["num_features_map"]
 
     x_df = df[num_features + cat_features]
-    y = config[target_col]
+    y = df[target_col]
     user_ids = df[id_col]
 
     # transform type: category
