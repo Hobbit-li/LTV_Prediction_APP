@@ -4,8 +4,10 @@ path_ref: "/kaggle/input/fat-2024-7-8/20250703_113205_35764_2gnin.csv"   # histo
 path_pre: "/kaggle/input/fat-2024-09/20250703_113345_36014_2gnin.csv"    # prediction target data
 
 # LTV prediction days
-days_list: [7, 30, 60, 90, 120, 240, 300]
-days_list_existed: [7, 30, 60, 90, 120]
+# days_list: [7, 30, 60, 90, 120, 240, 300]
+days_list: [300]
+# days_list_existed: [7, 30, 60, 90, 120]
+days_list_existed: [300]
 # Total cost for the cohort to be predicted
 cost: 1234991.68
 
