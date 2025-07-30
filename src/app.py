@@ -81,7 +81,7 @@ try:
         #             x_clf, x_clf, x_reg, x_reg, y_clf, y_clf, y_reg, y_reg, config
         #         )
         #         st.write("✅ 脚本已加载，无语法错误")
-
+        model_test = model_results
         with st.spinner("生成预测中..."):
             preds_results = {}
             for day in days_list:
