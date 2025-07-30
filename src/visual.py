@@ -59,7 +59,7 @@ def evaluate_ltv(preds_results, config):
     for day in days_list_existed:
         y_true = preds_results[day]["actual"].values
         y_pred = preds_results[day]["pred"].values
-        rmse = mean_squared_error(y_true, y_pred, squared=False)
+        rmse = mean_squared_error(y_true, y_pred)
         mae = mean_absolute_error(y_true, y_pred)
         msle = mean_squared_log_error(y_true, y_pred)
         r2 = r2_score(y_true, y_pred)
