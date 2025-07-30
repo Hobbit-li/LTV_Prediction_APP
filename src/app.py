@@ -63,24 +63,24 @@ try:
                     y_valid_payer,
                     config,
                 )
-                st.write("✅ 脚本已加载，无语法错误")
+            st.write("✅ 训练完成")
 
-        with st.spinner("使用验证集重新训练中..."):
-            model_test = {}
-            params_clf = config["params_clf"]
-            params_reg = config["params_reg"]
+        # with st.spinner("使用验证集重新训练中..."):
+        #     model_test = {}
+        #     params_clf = config["params_clf"]
+        #     params_reg = config["params_reg"]
 
-            for day, res in model_results.items():
-                params_clf["num_iterations"] = res["model_clf"].best_iteration
-                params_reg["num_iterations"] = res["model_reg"].best_iteration
+        #     for day, res in model_results.items():
+        #         params_clf["num_iterations"] = res["model_clf"].best_iteration
+        #         params_reg["num_iterations"] = res["model_reg"].best_iteration
 
-                x_clf, y_clf = temp_result["valid"][day]["nonpayer"]
-                x_reg, y_reg = temp_result["valid"][day]["payer"]
+        #         x_clf, y_clf = temp_result["valid"][day]["nonpayer"]
+        #         x_reg, y_reg = temp_result["valid"][day]["payer"]
 
-                model_test[day] = train_process(
-                    x_clf, x_clf, x_reg, x_reg, y_clf, y_clf, y_reg, y_reg, config
-                )
-                st.write("✅ 脚本已加载，无语法错误")
+        #         model_test[day] = train_process(
+        #             x_clf, x_clf, x_reg, x_reg, y_clf, y_clf, y_reg, y_reg, config
+        #         )
+        #         st.write("✅ 脚本已加载，无语法错误")
 
         with st.spinner("生成预测中..."):
             preds_results = {}
