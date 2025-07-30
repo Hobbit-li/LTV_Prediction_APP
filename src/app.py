@@ -109,10 +109,10 @@ try:
         output_path = f"{output_dir}/ltv_predictions.csv"
         save_predictions(preds_results, output_dir)
 
-        with open(output_path, "rb") as f:
-            st.download_button(
-                "📥 点击下载预测结果", f, file_name="ltv_predictions.csv"
-            )
+        # with open(output_path, "rb") as f:
+        #     st.download_button(
+        #         "📥 点击下载预测结果", f, file_name="ltv_predictions.csv"
+        #     )
 
         # 展示图表
         st.header("📈 模型可视化评估")
