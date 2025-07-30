@@ -81,6 +81,7 @@ try:
         #             x_clf, x_clf, x_reg, x_reg, y_clf, y_clf, y_reg, y_reg, config
         #         )
         #         st.write("✅ 脚本已加载，无语法错误")
+    if st.button("开始预测"):
         model_test = model_results
         with st.spinner("生成预测中..."):
             preds_results = {}
@@ -115,6 +116,7 @@ try:
         #     )
 
         # 展示图表
+    if st.button("展示结果"):
         st.header("📈 模型可视化评估")
 
         st.subheader("📊 预测值 vs 实际值")
@@ -126,8 +128,12 @@ try:
         st.pyplot(fig2)
 
         st.subheader("💡 LTV评估指标")
-        evaluate_ltv(preds_results, config)
-        show_roas_ltv(preds_results, config)
+
+        # 计算并展示LTV评估指标
+        ltv_metrics = evaluate_ltv(preds_results, config)
+        roas_ltv = show_roas_ltv(preds_results, config)
+        st.table(ltv_metrics)
+        st.table(roas_ltv)
 
 except Exception as e:
     st.error("❌ 发生错误，下面是详细信息：")
