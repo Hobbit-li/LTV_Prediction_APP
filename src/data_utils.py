@@ -108,13 +108,6 @@ def paid_split(x_df, y, config: dict):
     Args:
         data (pd.DataFrame): Input dataset
         payer_tag (str): Column name indicating payer status
-        days_list (list): Time periods for analysis
-        num_features (list): Numerical features
-        cat_features (list): Categorical features
-        target_col (str): Target variable name
-        id_col (str): Identifier column name
-        num_features_map (dict): Numerical feature metadata
-
     Returns:
         tuple: Split datasets
     """
