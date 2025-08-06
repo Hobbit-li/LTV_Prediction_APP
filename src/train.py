@@ -105,7 +105,6 @@ def train_reg(x_train, x_valid, y_train, y_valid, config: dict, value_weighting=
     - weight_multiplier: Weight multiplier for high-value users.
     """
     params_reg = config["params_reg"]
-    num_features = config["num_features"]
     cat_features = config["cat_features"]
     percentiles = config["percentiles"]
     base_weights = config["base_weights"]
@@ -168,18 +167,7 @@ def train_reg(x_train, x_valid, y_train, y_valid, config: dict, value_weighting=
         ],
     )  # Equivalent to verbose_eval=100
 
-    fold_importance_df = pd.DataFrame()
-    fold_importance_df["Feature"] = features
-    fold_importance_df["importance"] = reg.feature_importance()
-    fold_importance_df["importance_gain"] = reg.feature_importance(
-        importance_type="gain"
-    )
-    fold_importance_df = fold_importance_df.sort_values(
-        by="importance", ascending=False
-    )
-    # fold_importance_df.to_csv(f"importance_df_reg.csv", index=None)
-
-    # print("Example of input feature matrix for regression prediction:", x_valid)
+   
     # Predict log values
     y_preds_log = reg.predict(x_valid, num_iteration=reg.best_iteration)
     # Restore log and correct negative values
@@ -195,14 +183,7 @@ def train_reg(x_train, x_valid, y_train, y_valid, config: dict, value_weighting=
 
 
 def train_process(
-    x_train_1,
-    x_valid_1,
-    x_train_2,
-    x_valid_2,
-    y_train_1,
-    y_valid_1,
-    y_train_2,
-    y_valid_2,
+    result_df
     config,
 ):
     """
@@ -211,9 +192,12 @@ def train_process(
     _1: Dataset of players who have not paid during the feature period
     _2: Dataset of players who have paid (payer) during the feature period
     """
+    x_train_1, y_train_1 = result_df["train"]["nonpayer"]
+    x_train_2, y_train_2 = result_df["train"]["payer"]
+    x_valid_1, y_valid_1 = result_df["valid"]["nonpayer"]
+    x_valid_2, y_valid_2 = result_df["valid"]["payer"]
     params_clf = config["params_clf"]
     params_reg = config["params_reg"]
-    num_features = config["num_features"]
     cat_features = config["cat_features"]
     payer_tag = config["payer_tag"]
     # Check if the validation set is empty
