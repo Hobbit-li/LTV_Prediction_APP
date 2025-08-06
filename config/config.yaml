@@ -8,9 +8,11 @@ path_ref: "/kaggle/input/fat-2024-7-8/20250703_113205_35764_2gnin.csv"   # histo
 path_pre: "/kaggle/input/fat-2024-09/20250703_113345_36014_2gnin.csv"    # prediction target data
 
 # LTV prediction cycles -- Life Month
-days_list: [300]
-# days_list_existed: [7, 30, 60, 90, 120]
-days_list_existed: [300]
+# m0-m5
+ref_month: m5 
+# The month cycle of the follow-up forecast
+# pre_month: 15
+
 # Total cost for the cohort to be predicted
 cost: 1234991.68
 
@@ -47,48 +49,370 @@ payer_tag:
 # Categorical features
 cat_features: [countrytype, os, source, install_device, social_type]
 # Numerical features
-num_features: 
+num_features:
+  - first_duration
+  - d0_duration
+  - active_d0_cnt
+  - active_d3_cnt
+  - active_d7_cnt
+  - active_m0_cnt
+  - active_m1_cnt
+  - active_m2_cnt
+  - active_m3_cnt
+  - active_m4_cnt
+  - active_m5_cnt
+  - avg_dur_d3
+  - avg_dur_d7
+  - avg_dur_m0
+  - avg_dur_m1
+  - avg_dur_m2
+  - avg_dur_m3
+  - avg_dur_m4
+  - avg_dur_m5
+  - pay_d0_cnt
+  - pay_d3_cnt
+  - pay_d7_cnt
+  - pay_m0_cnt
+  - pay_m1_cnt
+  - pay_m2_cnt
+  - pay_m3_cnt
+  - pay_m4_cnt
+  - pay_m5_cnt
+  - ltv_d0
+  - ltv_d3
+  - ltv_d7
+  - ltv_m0
+  - ltv_m1
+  - ltv_m2
+  - ltv_m3
+  - ltv_m4
+  - ltv_m5
+  - ltv_m6
+  - ltv_m7
+  - ltv_m8
+  - ltv_m9
+  - ltv_m10
+  - ltv_m11
+  - ltv_m12
+  - ltv_m13
+  - ltv_m14
+  - ltv_m15
+  - ltv_m16
+  - ltv_m17
+  - ltv_m18
+  - ltv_m19
+  - ltv_m20
+  - ltv_m21
+  - ltv_m22
+  - ltv_m23
+
+
+
+num_features_map:
+  m0:
     - first_duration
     - d0_duration
-    - active_in3days
-    - avg_dur3days
-    - d0_usd
-    - pay_in3days
-    - avg_usd3days
-    - active_in7days
-    - avg_dur7days
-    - pay_in7days
-    - avg_usd7days
-    - active_in30days
-    - avg_dur30days
-    - pay_in30days
-    - avg_usd30days
-    - active_in2month
-    - avg_dur2month
-    - pay_in2month
-    - avg_usd2month
-    - active_in3month
-    - avg_dur3month
-    - pay_in3month
-    - avg_usd3month
-    - active_in4month
-    - avg_dur4month
-    - pay_in4month
-    - avg_usd4month
-    - active_in5months
-    - avg_dur5months
-    - pay_in5months
-    - avg_usd5months
+    - active_d0_cnt
+    - active_d3_cnt
+    - active_d7_cnt
+    - avg_dur_d3
+    - avg_dur_d7
+    - pay_d0_cnt
+    - pay_d3_cnt
+    - pay_d7_cnt
+    - ltv_d0
+    - ltv_d3
+    - ltv_d7
+    - active_m0_cnt
+    - avg_dur_m0
+    - pay_m0_cnt
+    - ltv_m0
+  m1:
+    - first_duration
+    - d0_duration
+    - active_d0_cnt
+    - active_d3_cnt
+    - active_d7_cnt
+    - avg_dur_d3
+    - avg_dur_d7
+    - pay_d0_cnt
+    - pay_d3_cnt
+    - pay_d7_cnt
+    - ltv_d0
+    - ltv_d3
+    - ltv_d7
+    - active_m0_cnt
+    - avg_dur_m0
+    - pay_m0_cnt
+    - ltv_m0
+    - active_m1_cnt
+    - avg_dur_m1
+    - pay_m1_cnt
+    - ltv_m1
+  m2:
+    - first_duration
+    - d0_duration
+    - active_d0_cnt
+    - active_d3_cnt
+    - active_d7_cnt
+    - avg_dur_d3
+    - avg_dur_d7
+    - pay_d0_cnt
+    - pay_d3_cnt
+    - pay_d7_cnt
+    - ltv_d0
+    - ltv_d3
+    - ltv_d7
+    - active_m0_cnt
+    - avg_dur_m0
+    - pay_m0_cnt
+    - ltv_m0
+    - active_m1_cnt
+    - avg_dur_m1
+    - pay_m1_cnt
+    - ltv_m1
+    - active_m2_cnt
+    - avg_dur_m2
+    - pay_m2_cnt
+    - ltv_m2
+  m3:
+    - first_duration
+    - d0_duration
+    - active_d0_cnt
+    - active_d3_cnt
+    - active_d7_cnt
+    - avg_dur_d3
+    - avg_dur_d7
+    - pay_d0_cnt
+    - pay_d3_cnt
+    - pay_d7_cnt
+    - ltv_d0
+    - ltv_d3
+    - ltv_d7
+    - active_m0_cnt
+    - avg_dur_m0
+    - pay_m0_cnt
+    - ltv_m0
+    - active_m1_cnt
+    - avg_dur_m1
+    - pay_m1_cnt
+    - ltv_m1
+    - active_m2_cnt
+    - avg_dur_m2
+    - pay_m2_cnt
+    - ltv_m2
+    - active_m3_cnt
+    - avg_dur_m3
+    - pay_m3_cnt
+    - ltv_m3
+  m4:
+    - first_duration
+    - d0_duration
+    - active_d0_cnt
+    - active_d3_cnt
+    - active_d7_cnt
+    - avg_dur_d3
+    - avg_dur_d7
+    - pay_d0_cnt
+    - pay_d3_cnt
+    - pay_d7_cnt
+    - ltv_d0
+    - ltv_d3
+    - ltv_d7
+    - active_m0_cnt
+    - avg_dur_m0
+    - pay_m0_cnt
+    - ltv_m0
+    - active_m1_cnt
+    - avg_dur_m1
+    - pay_m1_cnt
+    - ltv_m1
+    - active_m2_cnt
+    - avg_dur_m2
+    - pay_m2_cnt
+    - ltv_m2
+    - active_m3_cnt
+    - avg_dur_m3
+    - pay_m3_cnt
+    - ltv_m3
+    - active_m4_cnt
+    - avg_dur_m4
+    - pay_m4_cnt
+    - ltv_m4
+  m5:
+    - first_duration
+    - d0_duration
+    - active_d0_cnt
+    - active_d3_cnt
+    - active_d7_cnt
+    - avg_dur_d3
+    - avg_dur_d7
+    - pay_d0_cnt
+    - pay_d3_cnt
+    - pay_d7_cnt
+    - ltv_d0
+    - ltv_d3
+    - ltv_d7
+    - active_m0_cnt
+    - avg_dur_m0
+    - pay_m0_cnt
+    - ltv_m0
+    - active_m1_cnt
+    - avg_dur_m1
+    - pay_m1_cnt
+    - ltv_m1
+    - active_m2_cnt
+    - avg_dur_m2
+    - pay_m2_cnt
+    - ltv_m2
+    - active_m3_cnt
+    - avg_dur_m3
+    - pay_m3_cnt
+    - ltv_m3
+    - active_m4_cnt
+    - avg_dur_m4
+    - pay_m4_cnt
+    - ltv_m4
+    - active_m5_cnt
+    - avg_dur_m5
+    - pay_m5_cnt
+    - ltv_m5
+
+
+
+
 
 # Target columns (multi-output)
-target_col: 
-  - LTV_7day
-  - LTV_30day
-  - LTV_60day
-  - LTV_90day
-  - LTV_120day
-  - LTV_240day
-  - LTV_300day
+target_col_map:
+  m0:
+    - ltv_m1
+    - ltv_m2
+    - ltv_m3
+    - ltv_m4
+    - ltv_m5
+    - ltv_m6
+    - ltv_m7
+    - ltv_m8
+    - ltv_m9
+    - ltv_m10
+    - ltv_m11
+    - ltv_m12
+    - ltv_m13
+    - ltv_m14
+    - ltv_m15
+    - ltv_m16
+    - ltv_m17
+    - ltv_m18
+    - ltv_m19
+    - ltv_m20
+    - ltv_m21
+    - ltv_m22
+    - ltv_m23
+  m1:
+    - ltv_m2
+    - ltv_m3
+    - ltv_m4
+    - ltv_m5
+    - ltv_m6
+    - ltv_m7
+    - ltv_m8
+    - ltv_m9
+    - ltv_m10
+    - ltv_m11
+    - ltv_m12
+    - ltv_m13
+    - ltv_m14
+    - ltv_m15
+    - ltv_m16
+    - ltv_m17
+    - ltv_m18
+    - ltv_m19
+    - ltv_m20
+    - ltv_m21
+    - ltv_m22
+    - ltv_m23
+  m2:
+    - ltv_m3
+    - ltv_m4
+    - ltv_m5
+    - ltv_m6
+    - ltv_m7
+    - ltv_m8
+    - ltv_m9
+    - ltv_m10
+    - ltv_m11
+    - ltv_m12
+    - ltv_m13
+    - ltv_m14
+    - ltv_m15
+    - ltv_m16
+    - ltv_m17
+    - ltv_m18
+    - ltv_m19
+    - ltv_m20
+    - ltv_m21
+    - ltv_m22
+    - ltv_m23
+  m3:
+    - ltv_m4
+    - ltv_m5
+    - ltv_m6
+    - ltv_m7
+    - ltv_m8
+    - ltv_m9
+    - ltv_m10
+    - ltv_m11
+    - ltv_m12
+    - ltv_m13
+    - ltv_m14
+    - ltv_m15
+    - ltv_m16
+    - ltv_m17
+    - ltv_m18
+    - ltv_m19
+    - ltv_m20
+    - ltv_m21
+    - ltv_m22
+    - ltv_m23
+  m4:
+    - ltv_m5
+    - ltv_m6
+    - ltv_m7
+    - ltv_m8
+    - ltv_m9
+    - ltv_m10
+    - ltv_m11
+    - ltv_m12
+    - ltv_m13
+    - ltv_m14
+    - ltv_m15
+    - ltv_m16
+    - ltv_m17
+    - ltv_m18
+    - ltv_m19
+    - ltv_m20
+    - ltv_m21
+    - ltv_m22
+    - ltv_m23
+  m5:
+    - ltv_m6
+    - ltv_m7
+    - ltv_m8
+    - ltv_m9
+    - ltv_m10
+    - ltv_m11
+    - ltv_m12
+    - ltv_m13
+    - ltv_m14
+    - ltv_m15
+    - ltv_m16
+    - ltv_m17
+    - ltv_m18
+    - ltv_m19
+    - ltv_m20
+    - ltv_m21
+    - ltv_m22
+    - ltv_m23
 
 # User ID column
 id_col: user_id
