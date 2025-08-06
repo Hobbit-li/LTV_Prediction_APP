@@ -5,7 +5,7 @@ Contains functions for displaying and analyzing model results
 """
 
 
-def show_roas_ltv(preds_results, cost, cycles=pre_cycles):
+def show_roas_ltv(preds_results, cost, cycles=pre_cycles, payer_tag=payer_tag):
     """
     Evaluate predicted vs. actual ROAS and LTV values.
 
@@ -25,14 +25,15 @@ def show_roas_ltv(preds_results, cost, cycles=pre_cycles):
       }
     """
     result = {}
+    ltv_existed = preds_results[payer_tag].sum(axis=1)
     y_pred = preds_results[0]["pred"]
     y_actual = preds_results[0]["actual"]
     for i in range(cycles):
         # df_temp = preds_results[i]
-        roas_pred = y_pred.sum() / cost
-        roas_actual = y_actual.sum() / cost
-        ltv_pred = y_pred.mean()
-        ltv_actual = y_actual.mean()
+        roas_pred = y_pred.sum() + ltv_existed.sum() / cost
+        roas_actual = y_actual.sum() + ltv_existed.sum() / cost
+        ltv_pred = (y_pred + ltv_existed).mean()
+        ltv_actual = (y_actual + ltv_existed).mean()
 
         result[day] = {
             "ROAS_pred": roas_pred,
