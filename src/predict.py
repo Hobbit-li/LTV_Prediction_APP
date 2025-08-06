@@ -16,7 +16,7 @@ import numpy as np
 # payer_tag = config["payer_tag"]
 
 
-def predict_process(x1_df, x2_df, y1, y2, id_test, model1, model2, config: dict):
+def predict_process(result, model1, model2, config: dict):
     """
     Execute the full prediction process
 
@@ -31,6 +31,10 @@ def predict_process(x1_df, x2_df, y1, y2, id_test, model1, model2, config: dict)
         pd.DataFrame: Final predictions with LTV values
     """
     payer_tag = config["payer_tag"]
+     _, _, id_test = temp_result_test["train"][day]["all"]
+     x_test_nonpayer, y_test_nonpayer = temp_result_test["train"][day]["nonpayer"]
+     x_test_payer, y_test_payer = temp_result_test["train"][day]["payer"]
+
 
     existing_payer_tag = [col for col in payer_tag if col in x1_df.columns]
     if not existing_payer_tag:
