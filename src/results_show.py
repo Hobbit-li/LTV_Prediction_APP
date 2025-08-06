@@ -5,7 +5,7 @@ Contains functions for displaying and analyzing model results
 """
 
 
-def show_roas_ltv(preds_results, config):
+def show_roas_ltv(preds_results, cost, cycles=pre_cycles):
     """
     Evaluate predicted vs. actual ROAS and LTV values.
 
@@ -24,16 +24,15 @@ def show_roas_ltv(preds_results, config):
           }, ...
       }
     """
-    days_list = config["days_list"]
-    cost = config["cost"]
     result = {}
-
-    for day in days_list:
-        df_temp = preds_results[day]
-        roas_pred = df_temp["pred"].sum() / cost
-        roas_actual = df_temp["actual"].sum() / cost
-        ltv_pred = df_temp["pred"].mean()
-        ltv_actual = df_temp["actual"].mean()
+    y_pred = preds_results[0]["pred"]
+    y_actual = preds_results[0]["actual"]
+    for i in range(cycles):
+        # df_temp = preds_results[i]
+        roas_pred = y_pred.sum() / cost
+        roas_actual = y_actual.sum() / cost
+        ltv_pred = y_pred.mean()
+        ltv_actual = y_actual.mean()
 
         result[day] = {
             "ROAS_pred": roas_pred,
@@ -41,5 +40,11 @@ def show_roas_ltv(preds_results, config):
             "LTV_pred": ltv_pred,
             "LTV_actual": ltv_actual,
         }
+        try:
+            y_pred = y_pred + preds_results[i+1]["pred"]
+            y_actual = y_actual + preds_results[i+1]["actual"]
+        except (IndexError, KeyError):
+            raise IndexError(f"index i={i+1} not exists in preds_results.")
+        
 
     return result
