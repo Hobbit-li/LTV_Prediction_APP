@@ -61,44 +61,45 @@ def main():
     # df.head()
 
     # store the all splited datesets
-    temp_result = data_preprocess(df, config)
-    days_list = config["days_list"]
+    temp_result, pre_cycles = data_preprocess(df, config)
     # train process
     model_results = {}
-    for day in days_list:
-        x_train_nonpayer, y_train_nonpayer = temp_result["train"][day]["nonpayer"]
-        x_train_payer, y_train_payer = temp_result["train"][day]["payer"]
-        x_valid_nonpayer, y_valid_nonpayer = temp_result["valid"][day]["nonpayer"]
-        x_valid_payer, y_valid_payer = temp_result["valid"][day]["payer"]
+    result_copy = temp_result.copy()
+    for i in range(pre_cycles):
+        
+        for split in ["train", "valid"]:
+            for group in result_copy[split]:
+                x, y, *rest = result_copy[split][group]
+                try:
+                    y = y.iloc[:, i]  # 如果是 DataFrame
+                except AttributeError:
+                    y = [row[0] for row in y]  # 如果是列表
+
+                result_copy[split][group] = (x, y, *rest) if rest else (x, y)
+
         # day_features = num_features_map[day]
-        model_results[day] = train_process(
-            x_train_nonpayer,
-            x_valid_nonpayer,
-            x_train_payer,
-            x_valid_payer,
-            y_train_nonpayer,
-            y_valid_nonpayer,
-            y_train_payer,
-            y_valid_payer,
+        model_results[i] = train_process(
+           result_copy,
             config,
         )
 
     # retrain the model using valid data
     model_test = {}
+    model_test = model_results
     params_clf = config["params_clf"]
     params_reg = config["params_reg"]
 
-    for day, res in model_results.items():
-        params_clf["num_iterations"] = res["model_clf"].best_iteration
-        params_reg["num_iterations"] = res["model_reg"].best_iteration
+    # for day, res in model_results.items():
+    #     params_clf["num_iterations"] = res["model_clf"].best_iteration
+    #     params_reg["num_iterations"] = res["model_reg"].best_iteration
 
-        x_clf, y_clf = temp_result["valid"][day]["nonpayer"]
+    #     x_clf, y_clf = temp_result["valid"][day]["nonpayer"]
 
-        x_reg, y_reg = temp_result["valid"][day]["payer"]
+    #     x_reg, y_reg = temp_result["valid"][day]["payer"]
 
-        model_test[day] = train_process(
-            x_clf, x_clf, x_reg, x_reg, y_clf, y_clf, y_reg, y_reg, config
-        )
+    #     model_test[day] = train_process(
+    #         x_clf, x_clf, x_reg, x_reg, y_clf, y_clf, y_reg, y_reg, config
+    #     )
 
     # load the test data
     path_pre = config["path_pre"]
@@ -106,19 +107,23 @@ def main():
     test_df.fillna(0, inplace=True)
 
     temp_result_test = data_preprocess(test_df, config, train_data=False)
+    result_test_copy = temp_result_test.copy()
 
     preds_results = {}
-    for day in days_list:
-        _, _, id_test = temp_result_test["train"][day]["all"]
-        x_test_nonpayer, y_test_nonpayer = temp_result_test["train"][day]["nonpayer"]
-        x_test_payer, y_test_payer = temp_result_test["train"][day]["payer"]
+    for i in range(pre_cycles):
+        
+        for group in result_copy['train']:
+                x, y, *rest = result_test_copy['train'][group]
+                try:
+                    y = y.iloc[:, i]  # 如果是 DataFrame
+                except AttributeError:
+                    y = [row[0] for row in y]  # 如果是列表
+
+                result_test_copy['train'][group] = (x, y, *rest) if rest else (x, y)
+            
 
         preds_results[day] = predict_process(
-            x_test_nonpayer,
-            x_test_payer,
-            y_test_nonpayer,
-            y_test_payer,
-            id_test,
+            result_test_copy,
             model_test[day]["model_clf"],
             model_test[day]["model_reg"],
             config,
