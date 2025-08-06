@@ -30,21 +30,42 @@ top_num: 200
 # Payer tag columns (used to drop features for non-paying users)
 # list
 payer_tag:
-  - d0_usd
-  - pay_in3days
-  - pay_in7days
-  - pay_in30days
-  - pay_in2month
-  - pay_in3month
-  - pay_in4month
-  - pay_in5months
-  - avg_usd3days
-  - avg_usd7days
-  - avg_usd30days
-  - avg_usd2month
-  - avg_usd3month
-  - avg_usd4month
-  - avg_usd5months
+  - pay_d0_cnt
+  - pay_d3_cnt
+  - pay_d7_cnt
+  - pay_m0_cnt
+  - pay_m1_cnt
+  - pay_m2_cnt
+  - pay_m3_cnt
+  - pay_m4_cnt
+  - pay_m5_cnt
+  - ltv_d0
+  - ltv_d3
+  - ltv_d7
+  - ltv_m0
+  - ltv_m1
+  - ltv_m2
+  - ltv_m3
+  - ltv_m4
+  - ltv_m5
+  - ltv_m6
+  - ltv_m7
+  - ltv_m8
+  - ltv_m9
+  - ltv_m10
+  - ltv_m11
+  - ltv_m12
+  - ltv_m13
+  - ltv_m14
+  - ltv_m15
+  - ltv_m16
+  - ltv_m17
+  - ltv_m18
+  - ltv_m19
+  - ltv_m20
+  - ltv_m21
+  - ltv_m22
+  - ltv_m23
 
 # Categorical features
 cat_features: [countrytype, os, source, install_device, social_type]
