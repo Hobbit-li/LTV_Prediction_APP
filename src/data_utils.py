@@ -9,7 +9,7 @@ Contains helper functions for data processing:
 
 from sklearn.model_selection import train_test_split
 
-def data_preprocess(df, config: dict, ref_month=ref_month, train_data=True):
+def data_preprocess(df, config=config, ref_month=ref_month, train_data=True):
     """
     Preprocess data and split into payer/non-payer groups for each prediction day.
 
