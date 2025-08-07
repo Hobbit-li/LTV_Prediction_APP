@@ -7,39 +7,29 @@ Contains helper functions for data processing:
 - Preprocessing pipelines
 """
 
-# import pandas as pd
-# from config_loader import load_configf
 from sklearn.model_selection import train_test_split
 
-# config = load_config()
-
-
-def data_preprocess(df, ref_month, config: dict, train_data=True):
+def data_preprocess(df, config: dict, ref_month=ref_month, train_data=True):
     """
     Preprocess data and split into payer/non-payer groups for each prediction day.
 
-    Args:
-        df: Input DataFrame with features and targets
-        train_data: If True, split data into train/valid sets (default True)
-        config: Dict containing:
-            - payer_tag: Payer indicator column
-            - num_features/cat_features: Numerical/categorical feature names
-            - target_col: Target column names
-            - id_col: User ID column
-            - days_list: Prediction days to process
-            - num_features_map: Features for each day
-
+    Parameters:
+    - df: Input DataFrame with features and targets
+    - config: Dict containing:
+        - num_features/cat_features: Numerical/categorical feature names
+        - target_col: Target column names
+        - id_col: User ID column
+    - ref_month: numbers of the referrence month
+    - train_data: If True, split data into train/valid sets (default True)
+        
     Returns:
-        Dict with 'train'/'valid' keys, each containing day-wise splits:
+        Dict with 'train'/'valid' keys, each containing:
         {
-            day: {
-                "all": (features, target),
-                "nonpayer": (features, target),
-                "payer": (features, target)
-            }
+            "all": (features, target, unique_id),
+            "nonpayer": (features, target),
+            "payer": (features, target)
         }
     """
-    # ref_month = config["ref_month"]
     num_features = config["num_features_map"][ref_month]
     cat_features = config["cat_features"]
     target_col = config["target_col_map"][ref_month]
@@ -62,17 +52,14 @@ def data_preprocess(df, ref_month, config: dict, train_data=True):
         y_train = y_valid = y_df
         id_train = id_valid = user_ids
 
-    # Store outputs
     result = {"train": {}, "valid": {}}
-      # Split into payer vs non-payer
+    # Split into payer vs non-payer
     x_train_1, x_train_2, y_train_1, y_train_2 = paid_split(
-            x_train, y_train, config
+            x_train, y_train
         )
     x_valid_1, x_valid_2, y_valid_1, y_valid_2 = paid_split(
-            x_valid, y_valid, config
+            x_valid, y_valid
         )
-
-        # Store all sets in dict
     result["train"] = {
             "all": (x_train, y_train, id_train),
             "nonpayer": (x_train_1, y_train_1),
@@ -88,18 +75,19 @@ def data_preprocess(df, ref_month, config: dict, train_data=True):
     return result
 
 
-def paid_split(x_df, y_df, config: dict):
+def paid_split(x_df, y_df, payer_tag=payer_tag):
     """
     Split data into payer/non-payer subsets
 
-    Args:
-        data (pd.DataFrame): Input dataset
-        payer_tag (str): Column name indicating payer status
+    Parameters:
+    - x_df (pd.DataFrame): Input dataset including features
+    - y_df (pd.DataFrame): Input dataset including targets
+    - payer_tag (list[str]): Column names indicating payer status
+    
     Returns:
-        tuple: Split datasets
+        tuple: 4 dataframes, Split datasets
     """
-    payer_tag = config["payer_tag"]
-
+    
     existing_payer_tag = [col for col in payer_tag if col in x_df.columns]
     if not existing_payer_tag:
         raise ValueError(
