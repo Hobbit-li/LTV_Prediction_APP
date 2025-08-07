@@ -16,19 +16,24 @@ from sklearn.metrics import (
 )
 
 
-def compare_plot(preds_results, cycles=pre_cycles):
+def compare_plot(preds_results, cycles=10):
     """
-    Objective: show the actual and the predicted LTV increasingly
-    days_list_existed: have existed days for valid
-    preds_results: the predicted results by running the trained model
+    Show the actual and the predicted LTV increasingly
+    
+    - parameters:
+        - preds_results: Predicted results by running the trained model
+        - cycles: Numbers of predicted cycles, default: 10
+
+    - return: figs
     """
+    figs = []
     for i in range(cycles):
-        plt.figure(figsize=(20, 6))
+        fig, ax = plt.subplots(figsize=(20, 6))
         result_df_sorted = (
             preds_results[i].sort_values(by="actual").reset_index(drop=True)
         )
-        plt.plot(result_df_sorted["actual"], label="Actual", color="blue", linewidth=2)
-        plt.plot(
+        ax.plot(result_df_sorted["actual"], label="Actual", color="blue", linewidth=2)
+        ax.plot(
             result_df_sorted["pred"],
             label="Predicted",
             color="orange",
@@ -36,22 +41,25 @@ def compare_plot(preds_results, cycles=pre_cycles):
             linestyle="--",
         )
 
-        plt.title(f"Model Prediction vs Actual--Month Cycle--{i+1}")
-        plt.xlabel("Sample Index")
-        plt.ylabel("ltv_sum")
-        plt.legend()
-        plt.grid(True)
-        plt.tight_layout()
-        plt.show()
+        ax.set_title(f"Model Prediction vs Actual -- Month Cycle -- {i+1}")
+        ax.set_xlabel("Sample Index")
+        ax.set_ylabel("ltv_sum")
+        ax.legend()
+        ax.grid(True)
+        fig.tight_layout()
+        figs.append(fig)
+
+    return figs
 
 
 # Indicator evaluation
-def evaluate_ltv(preds_results, cycles=pre_cycles):
+def evaluate_ltv(preds_results, cycles=10):
     """
-    return RMSE, MAE, MSLE, R2
-    user sample
-    days_list_existed: have existed days for valid
-    preds_results: the predicted results by running the trained model
+    Evaluate the aggregate indicator (LTV)
+    - parameters:
+        - preds_results: Predicted results by running the trained model
+        - cycles: Numbers of predicted cycles, default: 10
+    - return: RMSE, MAE, MSLE, R2
     """
     eval_dict = {}
     for i in range(cycles):
@@ -62,7 +70,7 @@ def evaluate_ltv(preds_results, cycles=pre_cycles):
         msle = mean_squared_log_error(y_true, y_pred)
         r2 = r2_score(y_true, y_pred)
 
-        eval_dict[day] = {
+        eval_dict[f"Follow_Mon_{i}"] = {
             "RMSE": round(rmse, 4),
             "MAE": round(mae, 4),
             "MSLE": round(msle, 4),
@@ -72,22 +80,31 @@ def evaluate_ltv(preds_results, cycles=pre_cycles):
 
 
 # Residual analysis
-def residual_plot(preds_results, cycles=pre_cycles):
+def residual_plot(preds_results, cycles=10):
     """
-    Objective: show the residuals of LTV
-    days_list_existed: have existed days for valid
-    preds_results: the predicted results by running the trained model
+    Show the residuals between actual and the predicted LTV 
+    
+    - parameters:
+        - preds_results: Predicted results by running the trained model
+        - cycles: Numbers of predicted cycles, default: 10
+
+    - return: figs
     """
-    days_list_existed = config["days_list_existed"]
+    figs = []
     for i in range(cycles):
         residuals = (
             preds_results[i]["pred"].values - preds_results[i]["actual"].values
         )
-        plt.figure(figsize=(20, 4))
-        plt.plot(residuals, marker="o", linestyle="-", color="purple", alpha=0.7)
-        plt.title(f"Residuals Over Samples--Month Cycle--{i+1}")
-        plt.xlabel("Sample Index")
-        plt.ylim(-5000, 5000)
-        plt.ylabel("Residual (Prediction Error)")
-        plt.grid(True)
-        plt.show()
+        
+        fig, ax = plt.subplots(figsize=(20, 4))
+        ax.plot(residuals, marker="o", linestyle="-", color="purple", alpha=0.7)
+        ax.set_title(f"Residuals Over Samples -- Month Cycle -- {i+1}")
+        ax.set_xlabel("Sample Index")
+        ax.set_ylabel("Residual (Prediction Error)")
+        ax.set_ylim(-5000, 5000)
+        ax.grid(True)
+        fig.tight_layout()
+
+        figs.append(fig)
+
+    return figs
