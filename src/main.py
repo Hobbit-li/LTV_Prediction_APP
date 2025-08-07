@@ -60,20 +60,23 @@ def main():
     # print(df.shape)
     # df.head()
 
+    ref_month = "m5"
+    cost = 10000
     # store the all splited datesets
-    temp_result, pre_cycles = data_preprocess(df, config)
+    temp_result, pre_cycles = data_preprocess(df, config, ref_month)
     # train process
     model_results = {}
-    result_copy = temp_result.copy()
+    
     for i in range(pre_cycles):
         
+        result_copy = temp_result.copy()
         for split in ["train", "valid"]:
             for group in result_copy[split]:
                 x, y, *rest = result_copy[split][group]
                 try:
-                    y = y.iloc[:, i]  # 如果是 DataFrame
+                    y = y.iloc[:, i]  # if dataframe
                 except AttributeError:
-                    y = [row[0] for row in y]  # 如果是列表
+                    y = [row[0] for row in y]  # if list
 
                 result_copy[split][group] = (x, y, *rest) if rest else (x, y)
 
@@ -106,12 +109,13 @@ def main():
     test_df = pd.read_csv(path_pre)
     test_df.fillna(0, inplace=True)
 
-    temp_result_test = data_preprocess(test_df, config, train_data=False)
-    result_test_copy = temp_result_test.copy()
+    temp_result_test = data_preprocess(test_df, config, ref_month, train_data=False)
+    
 
     preds_results = {}
     for i in range(pre_cycles):
         
+        result_test_copy = temp_result_test.copy()
         for group in result_copy['train']:
                 x, y, *rest = result_test_copy['train'][group]
                 try:
@@ -122,10 +126,10 @@ def main():
                 result_test_copy['train'][group] = (x, y, *rest) if rest else (x, y)
             
 
-        preds_results[day] = predict_process(
+        preds_results[i] = predict_process(
             result_test_copy,
-            model_test[day]["model_clf"],
-            model_test[day]["model_reg"],
+            model_test[i]["model_clf"],
+            model_test[i]["model_reg"],
             config,
         )
         # print(preds_results[day].head())
@@ -134,14 +138,14 @@ def main():
         # )
     save_predictions(preds_results, create_output_dir())
 
-    compare_plot(preds_results, config)
+    compare_plot(preds_results, pre_cycles)
     re_dict = {}
-    re_dict = evaluate_ltv(preds_results, config)
+    re_dict = evaluate_ltv(preds_results, pre_cycles)
     save_metrics(re_dict, create_output_dir())
-    compare_plot(preds_results, config)
-    roas_results = show_roas_ltv(preds_results, config)
+    
+    roas_results = show_roas_ltv(preds_results, cost, config["payer_tag"], pre_cycles)
     save_metrics(roas_results, create_output_dir())
-    residual_plot(preds_results, config)
+    residual_plot(preds_results, pre_cycles)
 
 
 if __name__ == "__main__":
