@@ -15,7 +15,7 @@ from sklearn.metrics import (
     r2_score,
 )
 
-def train_clf(train_data, valid_data, config):
+def train_clf(train_data, valid_data, config=config):
     """
     Build the Binary Classifier Model by LightGBM
     Predict whether a breakthrough payment will occur in the subsequent period
@@ -29,8 +29,8 @@ def train_clf(train_data, valid_data, config):
         - y_valid
     - config (dict)
         - payer_tag
-        - params_clf: the agrs in the classifier model
-        
+        - params_clf: Agrs in the classifier model
+    
     return:
     - Model and model performance evaluation
     """
@@ -89,9 +89,9 @@ def r2_eval(preds, train_data):
 
     Parameters:
     - preds : array-like
-        The predicted values from the model.
+        Predicted values from the model.
     - train_data : lightgbm.Dataset
-        The training dataset object containing the true labels.
+        Training dataset object containing the true labels.
 
     Returns:
     tuple
@@ -104,7 +104,7 @@ def r2_eval(preds, train_data):
     return "r2", r2_score(labels, preds), True
 
 
-def train_reg(train_data, valid_data, config: dict, value_weighting=True):
+def train_reg(train_data, valid_data, config=config, value_weighting=True):
     """
     Build the Regression Model by LightGBM
     Predict the value of payment will occur in the subsequent period
@@ -208,8 +208,8 @@ def train_reg(train_data, valid_data, config: dict, value_weighting=True):
 
 
 def train_process(
-    result_df
-    config,
+    result_df,
+    config=config,
 ):
     """
     The binary classification model determines future payment behavior
@@ -241,7 +241,7 @@ def train_process(
 
     # Train the classification model on the dataset of players who have not paid during the feature period
     clf_valid, result_valid_clf= train_clf(
-        result_df["train"]["nonpayer"], result_df["valid"]["nonpayer"], config
+        result_df["train"]["nonpayer"], result_df["valid"]["nonpayer"]
     )
 
     # Predict on dataset 1
@@ -284,15 +284,13 @@ def train_process(
     y_combined_valid = pd.concat([y_valid_1[mask_payfu_2], y_valid_2], axis=0)
 
     reg_valid, result_valid_reg, importance_reg = train_reg(
-        x_combined_train, x_combined_valid, y_combined_train, y_combined_valid, config
+        (x_combined_train, y_combined_train), (x_combined_valid, y_combined_valid),
     )
     model_result = {
         "model_clf": clf_valid,
         "result_clf": result_valid_clf,
-        "im_clf": importance_clf,
         "model_reg": reg_valid,
         "result_reg": result_valid_reg,
-        "im_reg": importance_reg,
     }
 
     # If only training the model without validation
