@@ -115,19 +115,31 @@ def main():
     preds_results = {}
     for i in range(pre_cycles):
         
+        result_copy = temp_result.copy()
         result_test_copy = temp_result_test.copy()
-        for group in result_copy['train']:
-                x, y, *rest = result_test_copy['train'][group]
+        for group in ['all', 'nonpayer', 'payer']:
+                x, y, *rest = result_test_copy['valid'][group]
+                x1, y1, *rest1 = result_cop['valid'][group]
                 try:
-                    y = y.iloc[:, i]  # 如果是 DataFrame
+                    y = y.iloc[:, i]  # if dataframe
+                    y1 = y1.iloc[:, i]
                 except AttributeError:
-                    y = [row[0] for row in y]  # 如果是列表
+                    y = [row[0] for row in y]  # if list
+                    y1 = [row[0] for row in y1]
 
-                result_test_copy['train'][group] = (x, y, *rest) if rest else (x, y)
+                result_test_copy['valid'][group] = (x, y, *rest) if rest else (x, y)
+                result_copy['valid'][group] = (x1, y1, *rest1) if rest else (x1, y1)
             
 
         preds_results[i] = predict_process(
             result_test_copy,
+            model_test[i]["model_clf"],
+            model_test[i]["model_reg"],
+            config,
+        )
+        # adjustment
+        preds_train = predict_process(
+            result_copy,
             model_test[i]["model_clf"],
             model_test[i]["model_reg"],
             config,
