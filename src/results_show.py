@@ -1,22 +1,23 @@
 """
-Results Presentation Module
+Numerical Results Presentation Module
 
 Contains functions for displaying and analyzing model results
+Including ROAS and LTV (Aggregated indicators)
 """
 
-
-def show_roas_ltv(preds_results, cost, cycles=pre_cycles, payer_tag=payer_tag):
+def show_roas_ltv(preds_results, cost=cost, cycles=pre_cycles, existed_tag=payer_tag):
     """
-    Evaluate predicted vs. actual ROAS and LTV values.
+    Evaluate predicted vs. actual ROAS and LTV values
 
     Parameters:
     - preds_results (dict): {day: DataFrame with 'pred' and 'actual' columns}
-    - days_list (list[int]): Days to evaluate (e.g., [7, 30, 60])
     - cost (float): Total cost for ROAS calculation
+    - cycles (int): Cycles to be predicted
+    - existed_tag (list[str]): Payment that has been already occurred
 
     Returns:
     - result_dict (dict): {
-          day: {
+          1: {
               'ROAS_pred': float,
               'ROAS_actual': float,
               'LTV_pred': float,
@@ -35,7 +36,7 @@ def show_roas_ltv(preds_results, cost, cycles=pre_cycles, payer_tag=payer_tag):
         ltv_pred = (y_pred + ltv_existed).mean()
         ltv_actual = (y_actual + ltv_existed).mean()
 
-        result[day] = {
+        result[i] = {
             "ROAS_pred": roas_pred,
             "ROAS_actual": roas_actual,
             "LTV_pred": ltv_pred,
@@ -46,6 +47,4 @@ def show_roas_ltv(preds_results, cost, cycles=pre_cycles, payer_tag=payer_tag):
             y_actual = y_actual + preds_results[i+1]["actual"]
         except (IndexError, KeyError):
             raise IndexError(f"index i={i+1} not exists in preds_results.")
-        
-
     return result
