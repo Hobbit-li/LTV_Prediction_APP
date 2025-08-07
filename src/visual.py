@@ -16,7 +16,7 @@ from sklearn.metrics import (
 )
 
 
-def compare_plot(preds_results, cycles):
+def compare_plot(preds_results, cycles=pre_cycles):
     """
     Objective: show the actual and the predicted LTV increasingly
     days_list_existed: have existed days for valid
@@ -46,7 +46,7 @@ def compare_plot(preds_results, cycles):
 
 
 # Indicator evaluation
-def evaluate_ltv(preds_results, cycles):
+def evaluate_ltv(preds_results, cycles=pre_cycles):
     """
     return RMSE, MAE, MSLE, R2
     user sample
@@ -72,7 +72,7 @@ def evaluate_ltv(preds_results, cycles):
 
 
 # Residual analysis
-def residual_plot(preds_results, cycles):
+def residual_plot(preds_results, cycles=pre_cycles):
     """
     Objective: show the residuals of LTV
     days_list_existed: have existed days for valid
