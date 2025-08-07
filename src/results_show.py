@@ -26,7 +26,7 @@ def show_roas_ltv(preds_results, cost=cost, cycles=pre_cycles, existed_tag=payer
       }
     """
     result = {}
-    ltv_existed = preds_results[payer_tag].sum(axis=1)
+    ltv_existed = preds_results[existed_tag].sum(axis=1)
     y_pred = preds_results[0]["pred"]
     y_actual = preds_results[0]["actual"]
     for i in range(cycles):
