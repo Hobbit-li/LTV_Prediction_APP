@@ -13,23 +13,25 @@ def data_preprocess(df, config:dict, ref_month='m5', train_if=True):
     """
     Preprocess data and split into payer/non-payer groups for each prediction day.
 
-    Parameters:
-    - df (pd.DataFrame): Input DataFrame with features and targets
-    - config (dict): 
-        - num_features/cat_features (list): Numerical/categorical feature names
-        - target_col (list): Target column names
-        - id_col (str): User ID column
-        - payer_tag (list[str]): Column names indicating payer status
-    - ref_month (str): Key of the refrence month
-    - train_if (bool): If True, split data into train/valid sets, default: True
+    - Parameters:
+        - df (pd.DataFrame): Input DataFrame with features and targets
+        - config (dict): 
+            - num_features/cat_features (list): Numerical/categorical feature names
+            - target_col (list): Target column names
+            - id_col (str): User ID column
+            - payer_tag (list[str]): Column names indicating payer status
+        - ref_month (str): Key of the refrence month
+        - train_if (bool): If True, split data into train/valid sets, default: True
         
-    Returns:
-        Dict with 'train'/'valid' keys, each containing:
-        {
-            "all": (features, target, unique_id),
-            "nonpayer": (features, target),
-            "payer": (features, target)
-        }
+    - Returns:
+        - Dict with 'train'/'valid' keys, each containing:
+            {
+                "all": (features, target, unique_id),
+                "nonpayer": (features, target),
+                "payer": (features, target)
+            }
+        -  target_num (int): Numbers of predicted cycles
+            
     """
     num_features = config["num_features_map"][ref_month]
     cat_features = config["cat_features"]
@@ -40,7 +42,8 @@ def data_preprocess(df, config:dict, ref_month='m5', train_if=True):
     x_df = df[num_features + cat_features]
     y_df = df[target_col]
     user_ids = df[id_col]
-
+    
+    target_num = y_df.shape[1]
     # transform type: category
     for col in cat_features:
         x_df[col] = x_df[col].astype("category")
@@ -74,20 +77,19 @@ def data_preprocess(df, config:dict, ref_month='m5', train_if=True):
             "payer": (x_valid_2, y_valid_2),
         }
 
-    return result
+    return result, target_num
 
 
 def paid_split(x_df, y_df, payer_tag):
     """
     Split data into payer/non-payer subsets
 
-    Parameters:
-    - x_df (pd.DataFrame): Input dataset including features
-    - y_df (pd.DataFrame): Input dataset including targets
-    - payer_tag (list[str]): Column names indicating payer status
+    - Parameters:
+        - x_df (pd.DataFrame): Input dataset including features
+        - y_df (pd.DataFrame): Input dataset including targets
+        - payer_tag (list[str]): Column names indicating payer status
     
-    Returns:
-        tuple: 4 dataframes, Split datasets
+    - Returns (tuple): 4 dataframes, Split datasets
     """
     
     existing_payer_tag = [col for col in payer_tag if col in x_df.columns]
