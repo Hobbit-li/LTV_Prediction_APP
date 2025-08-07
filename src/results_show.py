@@ -5,15 +5,15 @@ Contains functions for displaying and analyzing model results
 Including ROAS and LTV (Aggregated indicators)
 """
 
-def show_roas_ltv(preds_results, cost=cost, cycles=pre_cycles, existed_tag=payer_tag):
+def show_roas_ltv(preds_results, cost, existed_tag, cycles=10):
     """
     Evaluate predicted vs. actual ROAS and LTV values
 
     Parameters:
     - preds_results (dict): {day: DataFrame with 'pred' and 'actual' columns}
     - cost (float): Total cost for ROAS calculation
-    - cycles (int): Cycles to be predicted
     - existed_tag (list[str]): Payment that has been already occurred
+    - cycles (int): Cycles to be predicted, default: 10
 
     Returns:
     - result_dict (dict): {
