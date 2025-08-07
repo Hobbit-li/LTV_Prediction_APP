@@ -9,18 +9,19 @@ Contains helper functions for data processing:
 
 from sklearn.model_selection import train_test_split
 
-def data_preprocess(df, config=config, ref_month=ref_month, train_data=True):
+def data_preprocess(df, config:dict, ref_month='m5', train_if=True):
     """
     Preprocess data and split into payer/non-payer groups for each prediction day.
 
     Parameters:
-    - df: Input DataFrame with features and targets
-    - config: Dict containing:
-        - num_features/cat_features: Numerical/categorical feature names
-        - target_col: Target column names
-        - id_col: User ID column
-    - ref_month: numbers of the referrence month
-    - train_data: If True, split data into train/valid sets (default True)
+    - df (pd.DataFrame): Input DataFrame with features and targets
+    - config (dict): 
+        - num_features/cat_features (list): Numerical/categorical feature names
+        - target_col (list): Target column names
+        - id_col (str): User ID column
+        - payer_tag (list[str]): Column names indicating payer status
+    - ref_month (str): Key of the refrence month
+    - train_if (bool): If True, split data into train/valid sets, default: True
         
     Returns:
         Dict with 'train'/'valid' keys, each containing:
@@ -34,6 +35,7 @@ def data_preprocess(df, config=config, ref_month=ref_month, train_data=True):
     cat_features = config["cat_features"]
     target_col = config["target_col_map"][ref_month]
     id_col = config["id_col"]
+    payer_tag = config["payer_tag"]
 
     x_df = df[num_features + cat_features]
     y_df = df[target_col]
@@ -43,7 +45,7 @@ def data_preprocess(df, config=config, ref_month=ref_month, train_data=True):
     for col in cat_features:
         x_df[col] = x_df[col].astype("category")
 
-    if train_data:
+    if train_if:
         x_train, x_valid, y_train, y_valid, id_train, id_valid = train_test_split(
             x_df, y_df, user_ids, test_size=0.3, random_state=42
         )
@@ -55,10 +57,10 @@ def data_preprocess(df, config=config, ref_month=ref_month, train_data=True):
     result = {"train": {}, "valid": {}}
     # Split into payer vs non-payer
     x_train_1, x_train_2, y_train_1, y_train_2 = paid_split(
-            x_train, y_train
+            x_train, y_train, payer_tag
         )
     x_valid_1, x_valid_2, y_valid_1, y_valid_2 = paid_split(
-            x_valid, y_valid
+            x_valid, y_valid, payer_tag
         )
     result["train"] = {
             "all": (x_train, y_train, id_train),
@@ -75,7 +77,7 @@ def data_preprocess(df, config=config, ref_month=ref_month, train_data=True):
     return result
 
 
-def paid_split(x_df, y_df, payer_tag=payer_tag):
+def paid_split(x_df, y_df, payer_tag):
     """
     Split data into payer/non-payer subsets
 
