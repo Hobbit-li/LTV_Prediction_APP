@@ -98,6 +98,65 @@ def r2_eval(preds, train_data):
     labels = train_data.get_label()
     return "r2", r2_score(labels, preds), True
 
+def combined_objective(y_true, y_pred, alpha=0.7):
+    """
+    Combined loss function: balances total sum difference and individual prediction quality.
+    alpha: weight for total sum difference component (range: 0–1)
+    """
+    # 1. Total sum difference component
+    sum_diff = np.sum(y_pred) - np.sum(y_true)
+    sum_grad = np.full_like(y_pred, 2 * alpha * sum_diff)
+    sum_hess = np.full_like(y_pred, 2 * alpha)
+    
+    # 2. Individual prediction error (MSE)
+    residual = y_pred - y_true
+    mse_grad = 2 * (1 - alpha) * residual
+    mse_hess = np.full_like(y_pred, 2 * (1 - alpha))
+    
+    # Combine gradients
+    grad = sum_grad + mse_grad
+    hess = sum_hess + mse_hess
+    
+    return grad, hess
+
+# Dynamically adjust weight during training
+def adaptive_objective(y_true, y_pred):
+    """
+    Focus more on individual prediction in early training,
+    and gradually shift to minimizing total sum difference.
+    """
+    context = lgb.basic._get_callback_context()
+    current_iter = context["iteration"]
+    total_iter = context["end_iteration"]
+    
+    # Increase alpha as training progresses
+    progress = current_iter / max(total_iter, 1)
+    alpha = min(0.8, 0.2 + 0.6 * progress)
+    
+    return combined_objective(y_true, y_pred, alpha)
+
+def calibrate_predictions(model, X_train, y_train, X_test):
+    """
+    Post-training calibration: adjust predictions so that the sum of predicted values
+    equals the sum of the actual values in the training set.
+    """
+    # Original predictions
+    train_pred = model.predict(X_train)
+    test_pred = model.predict(X_test)
+    
+    # Compute sum difference on training set
+    total_diff = np.sum(y_train) - np.sum(train_pred)
+    
+    # Scale adjustment by dataset sizes
+    n_train = len(y_train)
+    n_test = len(X_test)
+    adjustment = total_diff * (n_test / n_train) / n_test
+    
+    # Apply adjustment to test predictions
+    calibrated_pred = test_pred + adjustment
+    
+    return calibrated_pred
+
 
 def train_reg(train_data, valid_data, config:dict, value_weighting=True):
     """
@@ -179,6 +238,7 @@ def train_reg(train_data, valid_data, config:dict, value_weighting=True):
         params_reg,
         trn_data,
         valid_sets=[trn_data, val_data],
+        fobj=adaptive_objective,  # customed objective
         feval=r2_eval,
         callbacks=[
             lgb.early_stopping(stopping_rounds=50),
