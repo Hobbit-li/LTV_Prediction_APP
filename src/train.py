@@ -1,5 +1,6 @@
 """
 Model Training Module
+
 Contains functions for training classifier and regressor models
 """
 
@@ -14,16 +15,27 @@ from sklearn.metrics import (
     r2_score,
 )
 
-
-def train_clf(x_train, x_valid, y_train, y_valid, config):
+def train_clf(train_data, valid_data, config):
     """
-    Dataset:
-    - Users who have not paid during the feature period
-    Binary classification:
-    - Predict whether a breakthrough payment will occur in the subsequent period
+    Build the Binary Classifier Model by LightGBM
+    Predict whether a breakthrough payment will occur in the subsequent period
+    
+    Parameters:
+    - train_data (tuple(pd.DataFrame, pd.Series)):
+        - x_train
+        - y_train
+    - valid_data (tuple(pd.DataFrame, pd.Series)):
+        - x_valid
+        - y_valid
+    - config (dict)
+        - payer_tag
+        - params_clf: the agrs in the classifier model
+        
     return:
     - Model and model performance evaluation
     """
+    x_train, y_train = train_data
+    x_valid, y_valid = valid_data
     payer_tag = config["payer_tag"]
     params_clf = config["params_clf"]
     existing_payer_tag = [col for col in payer_tag if col in x_train.columns]
@@ -68,23 +80,20 @@ def train_clf(x_train, x_valid, y_train, y_valid, config):
         "AUC": roc_auc_score(y_val, y_pred_proba),
     }
 
-    return clf, result, fold_importance_df
+    return clf, result
 
 
-# Wrapper -- Training and prediction for the model
 def r2_eval(preds, train_data):
     """
-    Custom evaluation function to calculate R-squared (coefficient of determination) metric.
+    Custom evaluation function to calculate R-squared (coefficient of determination) metric
 
     Parameters:
-    -----------
-    preds : array-like
+    - preds : array-like
         The predicted values from the model.
-    train_data : lightgbm.Dataset
+    - train_data : lightgbm.Dataset
         The training dataset object containing the true labels.
 
     Returns:
-    --------
     tuple
         A tuple containing:
         - evaluation name (str): "r2"
@@ -95,15 +104,31 @@ def r2_eval(preds, train_data):
     return "r2", r2_score(labels, preds), True
 
 
-def train_reg(x_train, x_valid, y_train, y_valid, config: dict, value_weighting=True):
+def train_reg(train_data, valid_data, config: dict, value_weighting=True):
     """
-    Training function
-    - value_weighting: Whether to apply weights for high-value users.
-            If weighting is needed, set this parameter to True.
-    - quantile: High-value quantile threshold (e.g., top 1%),
-            which should be adjusted according to different projects.
-    - weight_multiplier: Weight multiplier for high-value users.
+    Build the Regression Model by LightGBM
+    Predict the value of payment will occur in the subsequent period
+    
+    Parameters:
+    - train_data (tuple(pd.DataFrame, pd.Series)):
+        - x_train
+        - y_train
+    - valid_data (tuple(pd.DataFrame, pd.Series)):
+        - x_valid
+        - y_valid
+    - config (dict)
+        - cat_features
+        - params_reg: the agrs in the regressor model
+        - percentiles: pay type
+        - base_weights: weights for different pay types
+        - top_num: numbers of the whale
+    - value_weighting: If True, weigth the samples, default: True
+        
+    return:
+    - Model and model performance evaluation
     """
+    x_train, y_train = train_data
+    x_valid, y_valid = valid_data
     params_reg = config["params_reg"]
     cat_features = config["cat_features"]
     percentiles = config["percentiles"]
@@ -179,7 +204,7 @@ def train_reg(x_train, x_valid, y_train, y_valid, config: dict, value_weighting=
         "R2": r2_score(y_valid, y_preds),
     }
 
-    return reg, result, fold_importance_df
+    return reg, result
 
 
 def train_process(
@@ -187,18 +212,21 @@ def train_process(
     config,
 ):
     """
-    The binary classification model determines future payment behavior.
-    The regression model predicts future LTV.
-    _1: Dataset of players who have not paid during the feature period
-    _2: Dataset of players who have paid (payer) during the feature period
+    The binary classification model determines future payment behavior
+    The regression model predicts future LTV
+    
+    Parameters:
+    - resultd_df: the original and splited datsset
+    - config:
+        - params_clf:
+        - params_reg
+    
     """
     x_train_1, y_train_1 = result_df["train"]["nonpayer"]
     x_train_2, y_train_2 = result_df["train"]["payer"]
     x_valid_1, y_valid_1 = result_df["valid"]["nonpayer"]
     x_valid_2, y_valid_2 = result_df["valid"]["payer"]
-    params_clf = config["params_clf"]
-    params_reg = config["params_reg"]
-    cat_features = config["cat_features"]
+   
     payer_tag = config["payer_tag"]
     # Check if the validation set is empty
     # The purpose is to train only, without validation
@@ -212,8 +240,8 @@ def train_process(
         # print("Train only, no validation")
 
     # Train the classification model on the dataset of players who have not paid during the feature period
-    clf_valid, result_valid_clf, importance_clf = train_clf(
-        x_train_1, x_valid_1, y_train_1, y_valid_1, config
+    clf_valid, result_valid_clf= train_clf(
+        result_df["train"]["nonpayer"], result_df["valid"]["nonpayer"], config
     )
 
     # Predict on dataset 1
