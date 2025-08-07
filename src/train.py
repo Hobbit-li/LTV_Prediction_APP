@@ -15,24 +15,23 @@ from sklearn.metrics import (
     r2_score,
 )
 
-def train_clf(train_data, valid_data, config=config):
+def train_clf(train_data, valid_data, config:dict):
     """
     Build the Binary Classifier Model by LightGBM
     Predict whether a breakthrough payment will occur in the subsequent period
     
-    Parameters:
-    - train_data (tuple(pd.DataFrame, pd.Series)):
-        - x_train
-        - y_train
-    - valid_data (tuple(pd.DataFrame, pd.Series)):
-        - x_valid
-        - y_valid
-    - config (dict)
-        - payer_tag
-        - params_clf: Agrs in the classifier model
+    - Parameters:
+        - train_data (tuple(pd.DataFrame, pd.Series)):
+            - x_train
+            - y_train
+        - valid_data (tuple(pd.DataFrame, pd.Series)):
+            - x_valid
+            - y_valid
+        - config (dict):
+            - payer_tag
+            - params_clf: Args in the classifier model
     
-    return:
-    - Model and model performance evaluation
+    - return: Model and model performance evaluation
     """
     x_train, y_train = train_data
     x_valid, y_valid = valid_data
@@ -87,15 +86,11 @@ def r2_eval(preds, train_data):
     """
     Custom evaluation function to calculate R-squared (coefficient of determination) metric
 
-    Parameters:
-    - preds : array-like
-        Predicted values from the model.
-    - train_data : lightgbm.Dataset
-        Training dataset object containing the true labels.
+    - Parameters:
+        - preds (dict): Predicted values from the model.
+        - train_data (lightgbm.Dataset): Training dataset object containing the true labels.
 
-    Returns:
-    tuple
-        A tuple containing:
+    - Returns: tuple
         - evaluation name (str): "r2"
         - r2 score (float): The calculated R-squared score
         - is_higher_better (bool): True, indicating higher scores are better
@@ -104,28 +99,27 @@ def r2_eval(preds, train_data):
     return "r2", r2_score(labels, preds), True
 
 
-def train_reg(train_data, valid_data, config=config, value_weighting=True):
+def train_reg(train_data, valid_data, config:dict, value_weighting=True):
     """
     Build the Regression Model by LightGBM
     Predict the value of payment will occur in the subsequent period
     
-    Parameters:
-    - train_data (tuple(pd.DataFrame, pd.Series)):
-        - x_train
-        - y_train
-    - valid_data (tuple(pd.DataFrame, pd.Series)):
-        - x_valid
-        - y_valid
-    - config (dict)
-        - cat_features
-        - params_reg: the agrs in the regressor model
-        - percentiles: pay type
-        - base_weights: weights for different pay types
-        - top_num: numbers of the whale
-    - value_weighting: If True, weigth the samples, default: True
+    - Parameters:
+        - train_data (tuple(pd.DataFrame, pd.Series)):
+            - x_train
+            - y_train
+        - valid_data (tuple(pd.DataFrame, pd.Series)):
+            - x_valid
+            - y_valid
+        - config (dict)
+            - cat_features
+            - params_reg: the agrs in the regressor model
+            - percentiles: pay type
+            - base_weights: weights for different pay types
+            - top_num: numbers of the whale
+        - value_weighting: If True, weigth the samples, default: True
         
-    return:
-    - Model and model performance evaluation
+    - return: Model and model performance evaluation
     """
     x_train, y_train = train_data
     x_valid, y_valid = valid_data
@@ -209,7 +203,7 @@ def train_reg(train_data, valid_data, config=config, value_weighting=True):
 
 def train_process(
     result_df,
-    config=config,
+    config:dict,
 ):
     """
     The binary classification model determines future payment behavior
@@ -241,7 +235,7 @@ def train_process(
 
     # Train the classification model on the dataset of players who have not paid during the feature period
     clf_valid, result_valid_clf= train_clf(
-        result_df["train"]["nonpayer"], result_df["valid"]["nonpayer"]
+        result_df["train"]["nonpayer"], result_df["valid"]["nonpayer"], config
     )
 
     # Predict on dataset 1
@@ -284,7 +278,7 @@ def train_process(
     y_combined_valid = pd.concat([y_valid_1[mask_payfu_2], y_valid_2], axis=0)
 
     reg_valid, result_valid_reg, importance_reg = train_reg(
-        (x_combined_train, y_combined_train), (x_combined_valid, y_combined_valid),
+        (x_combined_train, y_combined_train), (x_combined_valid, y_combined_valid), config
     )
     model_result = {
         "model_clf": clf_valid,
