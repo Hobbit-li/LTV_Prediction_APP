@@ -20,15 +20,14 @@ def predict_process(result, model1, model2, config: dict):
     """
     Execute the full prediction process
 
-    Args:
-        x1_df (pd.DataFrame): Features for non-payer prediction
-        x2_df (pd.DataFrame): Features for payer prediction
-        model1 (Classifier): Trained classifier model
-        model2 (Regressor): Trained regressor model
-        config: Laod the config.yaml
+    - Parameters:
+        - x1_df (pd.DataFrame): Features for non-payer prediction
+        - x2_df (pd.DataFrame): Features for payer prediction
+        - model1 (Classifier): Trained classifier model
+        - model2 (Regressor): Trained regressor model
+        - config: Laod the config.yaml
 
-    Returns:
-        pd.DataFrame: Final predictions with LTV values
+    - Returns: pd.DataFrame: Final predictions with LTV values
     """
     payer_tag = config["payer_tag"]
      _, _, id_test = temp_result_test["train"][day]["all"]
