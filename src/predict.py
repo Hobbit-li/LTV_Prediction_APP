@@ -10,29 +10,24 @@ This module handles the prediction pipeline for the LTV model, including:
 import pandas as pd
 import numpy as np
 
-# from config_loader import load_config
-
-# config = load_config()
-# payer_tag = config["payer_tag"]
-
-
 def predict_process(result, model1, model2, config: dict):
     """
     Execute the full prediction process
 
     - Parameters:
-        - x1_df (pd.DataFrame): Features for non-payer prediction
-        - x2_df (pd.DataFrame): Features for payer prediction
+        - result (dict[str, dict[str, pd.DataFrame]])
+            - x1_df (pd.DataFrame): Features for non-payer prediction
+            - x2_df (pd.DataFrame): Features for payer prediction
         - model1 (Classifier): Trained classifier model
         - model2 (Regressor): Trained regressor model
-        - config: Laod the config.yaml
+        - config (dict): Laod the config.yaml
 
     - Returns: pd.DataFrame: Final predictions with LTV values
     """
     payer_tag = config["payer_tag"]
-     _, _, id_test = temp_result_test["valid"]["all"]
-     x1_df, y1 = temp_result_test["valid"]["nonpayer"]
-     x2_df, y2 = temp_result_test["valid"]["payer"]
+    _, _, id_test = result["valid"]["all"]
+    x1_df, y1 = result["valid"]["nonpayer"]
+    x2_df, y2 = result["valid"]["payer"]
 
 
     existing_payer_tag = [col for col in payer_tag if col in x1_df.columns]
@@ -40,7 +35,6 @@ def predict_process(result, model1, model2, config: dict):
         raise ValueError(
             "No payer_tag columns found in X; unable to identify unpaid users."
         )
-    # print(eval(f"X_test_day{day}_1").drop(columns=existing_payer_tag).head())
 
     temp = model1.predict(
         x1_df.drop(columns=existing_payer_tag),
@@ -74,8 +68,6 @@ def predict_process(result, model1, model2, config: dict):
     # Add information for players predicted not to pay in the next step
     x1_df_copy.loc[~mask_payfu, "actual"] = y1[~mask_payfu].values
     x1_df_copy.loc[~mask_payfu, "pred"] = 0
-    # print(y1[~mask_payfu].values)
-    # print(x1_df_copy[~mask_payfu][['actual', 'pred']].head())
 
     temp = pd.concat(
         [x_df_combined, x1_df_copy[~mask_payfu].drop(columns="pay_class_pred")], axis=0
