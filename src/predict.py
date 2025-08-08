@@ -30,9 +30,9 @@ def predict_process(result, model1, model2, config: dict):
     - Returns: pd.DataFrame: Final predictions with LTV values
     """
     payer_tag = config["payer_tag"]
-     _, _, id_test = temp_result_test["train"][day]["all"]
-     x_test_nonpayer, y_test_nonpayer = temp_result_test["train"][day]["nonpayer"]
-     x_test_payer, y_test_payer = temp_result_test["train"][day]["payer"]
+     _, _, id_test = temp_result_test["valid"]["all"]
+     x1_df, y1 = temp_result_test["valid"]["nonpayer"]
+     x2_df, y2 = temp_result_test["valid"]["payer"]
 
 
     existing_payer_tag = [col for col in payer_tag if col in x1_df.columns]
