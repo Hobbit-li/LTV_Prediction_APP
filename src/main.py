@@ -111,15 +111,15 @@ def main():
 
     temp_result_test = data_preprocess(test_df, config, ref_month, train_data=False)
     
-
     preds_results = {}
+    adjust_preds_results = {}
     for i in range(pre_cycles):
-        
-        result_copy = temp_result.copy()
+        # use the "valid" data to predict
         result_test_copy = temp_result_test.copy()
+        result_copy = temp_result.copy()
         for group in ['all', 'nonpayer', 'payer']:
                 x, y, *rest = result_test_copy['valid'][group]
-                x1, y1, *rest1 = result_cop['valid'][group]
+                x1, y1, *rest1 = result_copy['valid'][group]
                 try:
                     y = y.iloc[:, i]  # if dataframe
                     y1 = y1.iloc[:, i]
@@ -137,6 +137,7 @@ def main():
             model_test[i]["model_reg"],
             config,
         )
+        
         # adjustment
         preds_train = predict_process(
             result_copy,
@@ -144,6 +145,10 @@ def main():
             model_test[i]["model_reg"],
             config,
         )
+        adjustment = (preds_train["pred"].values.sum() - preds_train["actual"].values.sum()) / len(preds_train)
+        adjust_preds_results[i] = preds_results[i].copy()
+        adjust_preds_results[i]["pred"] = adjust_preds_results[i]["pred"] - adjustment
+    
         # print(preds_results[day].head())
         # preds_results[day].to_csv(
         #     f"prediction_results_DA_DAY{day}.csv", index=False, encoding="utf-8-sig"
@@ -151,13 +156,19 @@ def main():
     save_predictions(preds_results, create_output_dir())
 
     compare_plot(preds_results, pre_cycles)
+    compare_plot(adjust_preds_results, pre_cycles)
+    
     re_dict = {}
+    re_dict_adjust = {}
     re_dict = evaluate_ltv(preds_results, pre_cycles)
+    re_dict_adjust = evaluate_ltv(adjust_preds_results, pre_cycles)
     save_metrics(re_dict, create_output_dir())
     
     roas_results = show_roas_ltv(preds_results, cost, config["payer_tag"], pre_cycles)
+    roas_results = show_roas_ltv(adjust_preds_results, cost, config["payer_tag"], pre_cycles)
     save_metrics(roas_results, create_output_dir())
     residual_plot(preds_results, pre_cycles)
+    residual_plot(adjust_preds_results, pre_cycles)
 
 
 if __name__ == "__main__":
