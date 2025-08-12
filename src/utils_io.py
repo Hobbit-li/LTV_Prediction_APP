@@ -8,7 +8,6 @@ Provides file operations for:
 """
 
 import os
-import json
 from datetime import datetime
 import joblib
 import pandas as pd
