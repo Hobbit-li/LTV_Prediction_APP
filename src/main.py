@@ -11,6 +11,7 @@ Orchestrates the full model pipeline:
 # from IPython.display import Image
 # Image("/kaggle/input/process-image/deepseek_mermaid_20250613_79aa76.png", width=500)
 # import necessary packages
+from pathlib import Path
 import logging
 import warnings
 import pandas as pd
@@ -30,19 +31,15 @@ from visual import compare_plot, evaluate_ltv, residual_plot
 
 def main():
     """
-    Execute end-to-end model workflow
-
     Steps:
     1. Load configuration
     2. Preprocess data
     3. Train models
     4. Generate predictions
     5. Evaluate performance
-    6. Save outputs
     """
     # Configuration
     warnings.simplefilter("ignore")
-    pd.set_option("display.max_columns", None)
     # params load
     config = load_config()
     # load the historical referrence data
@@ -95,8 +92,8 @@ def main():
     # retrain the model using valid data
     model_test = {}
     model_test = model_results
-    params_clf = config["params_clf"]
-    params_reg = config["params_reg"]
+    # params_clf = config["params_clf"]
+    # params_reg = config["params_reg"]
 
     # for day, res in model_results.items():
     #     params_clf["num_iterations"] = res["model_clf"].best_iteration
@@ -118,14 +115,14 @@ def main():
     test_df = pd.read_csv(path_pre, compression="gzip")
     test_df.dropna(axis=1, how="all")
 
-    temp_result_test = data_preprocess(test_df, config, ref_month, train_data=False)
+    temp_result_test = data_preprocess(test_df, config, ref_month, train_if=False)
 
     preds_results = {}
     adjust_preds_results = {}
     for i in range(pre_cycles):
         # use the "valid" data to predict
-        result_test_copy = temp_result_test.copy()
-        result_copy = temp_result.copy()
+        result_test_copy = temp_result_test
+        result_copy = temp_result
         for group in ["all", "nonpayer", "payer"]:
             x, y, *rest = result_test_copy["valid"][group]
             x1, y1, *rest1 = result_copy["valid"][group]
@@ -165,22 +162,23 @@ def main():
         # )
     save_predictions(preds_results, create_output_dir())
 
-    compare_plot(preds_results, pre_cycles)
-    compare_plot(adjust_preds_results, pre_cycles)
+    figs_com1 = compare_plot(preds_results, pre_cycles)
+    figs_com2 = compare_plot(adjust_preds_results, pre_cycles)
 
     re_dict = {}
     re_dict_adjust = {}
     re_dict = evaluate_ltv(preds_results, pre_cycles)
     re_dict_adjust = evaluate_ltv(adjust_preds_results, pre_cycles)
     save_metrics(re_dict, create_output_dir())
+    save_metrics(re_dict_adjust, create_output_dir())
 
     roas_results = show_roas_ltv(preds_results, cost, config["payer_tag"], pre_cycles)
-    roas_results = show_roas_ltv(
+    roas_results_adjust = show_roas_ltv(
         adjust_preds_results, cost, config["payer_tag"], pre_cycles
     )
     save_metrics(roas_results, create_output_dir())
-    residual_plot(preds_results, pre_cycles)
-    residual_plot(adjust_preds_results, pre_cycles)
+    figs_res1 = residual_plot(preds_results, pre_cycles)
+    figs_res2 = residual_plot(adjust_preds_results, pre_cycles)
 
 
 if __name__ == "__main__":
