@@ -46,9 +46,13 @@ def main():
     # params load
     config = load_config()
     # load the historical referrence data
-    path_ref = config["path_ref"]
-    df = pd.read_csv(path_ref)
-    df.fillna(0, inplace=True)
+    path_ref = Path(__file__).parent.parent / "data" / "20250812_100327_09062_tej97.csv.gz"
+    df = pd.read_csv(path_ref, compression="gzip")
+    df.dropna(axis=1, how='all')
+
+    # path_ref = config["path_ref"]
+    # df = pd.read_csv(path_ref)
+    # df.fillna(0, inplace=True)
 
     buffer = []
     df.info(buf=buffer.append)
@@ -105,9 +109,10 @@ def main():
     #     )
 
     # load the test data
-    path_pre = config["path_pre"]
-    test_df = pd.read_csv(path_pre)
-    test_df.fillna(0, inplace=True)
+    path_pre = Path(__file__).parent.parent / "data" / "20250812_100210_09037_tej97.csv.gz"
+
+    test_df = pd.read_csv(path_pre, compression="gzip")
+    test_df.dropna(axis=1, how='all')
 
     temp_result_test = data_preprocess(test_df, config, ref_month, train_data=False)
     
