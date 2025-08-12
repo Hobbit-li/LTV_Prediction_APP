@@ -103,7 +103,7 @@ def r2_eval(preds, train_data):
 
 def combined_objective(y_true, y_pred, alpha=0.7):
     """
-    - Combined loss function: 
+    - Combined loss function:
         - balances total sum difference and individual prediction quality
         - alpha: weight for total sum difference component (range: 0–1)
     """
