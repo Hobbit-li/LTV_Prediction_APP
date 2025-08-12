@@ -40,6 +40,7 @@ def data_preprocess(df, config: dict, ref_month="m5", train_if=True):
     id_col = config["id_col"]
     payer_tag = config["payer_tag"]
 
+    target_col = [col for col in target_col if col in df.columns]
     x_df = df[num_features + cat_features]
     y_df = df[target_col]
     user_ids = df[id_col]
