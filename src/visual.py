@@ -19,7 +19,7 @@ from sklearn.metrics import (
 def compare_plot(preds_results, cycles=10):
     """
     Show the actual and the predicted LTV increasingly
-    
+
     - parameters:
         - preds_results: Predicted results by running the trained model
         - cycles: Numbers of predicted cycles, default: 10
@@ -82,8 +82,8 @@ def evaluate_ltv(preds_results, cycles=10):
 # Residual analysis
 def residual_plot(preds_results, cycles=10):
     """
-    Show the residuals between actual and the predicted LTV 
-    
+    Show the residuals between actual and the predicted LTV
+
     - parameters:
         - preds_results: Predicted results by running the trained model
         - cycles: Numbers of predicted cycles, default: 10
@@ -92,10 +92,8 @@ def residual_plot(preds_results, cycles=10):
     """
     figs = []
     for i in range(cycles):
-        residuals = (
-            preds_results[i]["pred"].values - preds_results[i]["actual"].values
-        )
-        
+        residuals = preds_results[i]["pred"].values - preds_results[i]["actual"].values
+
         fig, ax = plt.subplots(figsize=(20, 4))
         ax.plot(residuals, marker="o", linestyle="-", color="purple", alpha=0.7)
         ax.set_title(f"Residuals Over Samples -- Month Cycle -- {i+1}")

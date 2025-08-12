@@ -10,6 +10,7 @@ This module handles the prediction pipeline for the LTV model, including:
 import pandas as pd
 import numpy as np
 
+
 def predict_process(result, model1, model2, config: dict):
     """
     Execute the full prediction process
@@ -28,7 +29,6 @@ def predict_process(result, model1, model2, config: dict):
     _, _, id_test = result["valid"]["all"]
     x1_df, y1 = result["valid"]["nonpayer"]
     x2_df, y2 = result["valid"]["payer"]
-
 
     existing_payer_tag = [col for col in payer_tag if col in x1_df.columns]
     if not existing_payer_tag:

@@ -46,9 +46,11 @@ def main():
     # params load
     config = load_config()
     # load the historical referrence data
-    path_ref = Path(__file__).parent.parent / "data" / "20250812_100327_09062_tej97.csv.gz"
+    path_ref = (
+        Path(__file__).parent.parent / "data" / "20250812_100327_09062_tej97.csv.gz"
+    )
     df = pd.read_csv(path_ref, compression="gzip")
-    df.dropna(axis=1, how='all')
+    df.dropna(axis=1, how="all")
 
     # path_ref = config["path_ref"]
     # df = pd.read_csv(path_ref)
@@ -70,9 +72,9 @@ def main():
     temp_result, pre_cycles = data_preprocess(df, config, ref_month)
     # train process
     model_results = {}
-    
+
     for i in range(pre_cycles):
-        
+
         result_copy = temp_result.copy()
         for split in ["train", "valid"]:
             for group in result_copy[split]:
@@ -86,7 +88,7 @@ def main():
 
         # day_features = num_features_map[day]
         model_results[i] = train_process(
-           result_copy,
+            result_copy,
             config,
         )
 
@@ -109,32 +111,33 @@ def main():
     #     )
 
     # load the test data
-    path_pre = Path(__file__).parent.parent / "data" / "20250812_100210_09037_tej97.csv.gz"
+    path_pre = (
+        Path(__file__).parent.parent / "data" / "20250812_100210_09037_tej97.csv.gz"
+    )
 
     test_df = pd.read_csv(path_pre, compression="gzip")
-    test_df.dropna(axis=1, how='all')
+    test_df.dropna(axis=1, how="all")
 
     temp_result_test = data_preprocess(test_df, config, ref_month, train_data=False)
-    
+
     preds_results = {}
     adjust_preds_results = {}
     for i in range(pre_cycles):
         # use the "valid" data to predict
         result_test_copy = temp_result_test.copy()
         result_copy = temp_result.copy()
-        for group in ['all', 'nonpayer', 'payer']:
-                x, y, *rest = result_test_copy['valid'][group]
-                x1, y1, *rest1 = result_copy['valid'][group]
-                try:
-                    y = y.iloc[:, i]  # if dataframe
-                    y1 = y1.iloc[:, i]
-                except AttributeError:
-                    y = [row[0] for row in y]  # if list
-                    y1 = [row[0] for row in y1]
+        for group in ["all", "nonpayer", "payer"]:
+            x, y, *rest = result_test_copy["valid"][group]
+            x1, y1, *rest1 = result_copy["valid"][group]
+            try:
+                y = y.iloc[:, i]  # if dataframe
+                y1 = y1.iloc[:, i]
+            except AttributeError:
+                y = [row[0] for row in y]  # if list
+                y1 = [row[0] for row in y1]
 
-                result_test_copy['valid'][group] = (x, y, *rest) if rest else (x, y)
-                result_copy['valid'][group] = (x1, y1, *rest1) if rest else (x1, y1)
-            
+            result_test_copy["valid"][group] = (x, y, *rest) if rest else (x, y)
+            result_copy["valid"][group] = (x1, y1, *rest1) if rest else (x1, y1)
 
         preds_results[i] = predict_process(
             result_test_copy,
@@ -142,7 +145,7 @@ def main():
             model_test[i]["model_reg"],
             config,
         )
-        
+
         # adjustment
         preds_train = predict_process(
             result_copy,
@@ -150,10 +153,12 @@ def main():
             model_test[i]["model_reg"],
             config,
         )
-        adjustment = (preds_train["pred"].values.sum() - preds_train["actual"].values.sum()) / len(preds_train)
+        adjustment = (
+            preds_train["pred"].values.sum() - preds_train["actual"].values.sum()
+        ) / len(preds_train)
         adjust_preds_results[i] = preds_results[i].copy()
         adjust_preds_results[i]["pred"] = adjust_preds_results[i]["pred"] - adjustment
-    
+
         # print(preds_results[day].head())
         # preds_results[day].to_csv(
         #     f"prediction_results_DA_DAY{day}.csv", index=False, encoding="utf-8-sig"
@@ -162,15 +167,17 @@ def main():
 
     compare_plot(preds_results, pre_cycles)
     compare_plot(adjust_preds_results, pre_cycles)
-    
+
     re_dict = {}
     re_dict_adjust = {}
     re_dict = evaluate_ltv(preds_results, pre_cycles)
     re_dict_adjust = evaluate_ltv(adjust_preds_results, pre_cycles)
     save_metrics(re_dict, create_output_dir())
-    
+
     roas_results = show_roas_ltv(preds_results, cost, config["payer_tag"], pre_cycles)
-    roas_results = show_roas_ltv(adjust_preds_results, cost, config["payer_tag"], pre_cycles)
+    roas_results = show_roas_ltv(
+        adjust_preds_results, cost, config["payer_tag"], pre_cycles
+    )
     save_metrics(roas_results, create_output_dir())
     residual_plot(preds_results, pre_cycles)
     residual_plot(adjust_preds_results, pre_cycles)

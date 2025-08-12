@@ -9,20 +9,21 @@ Contains helper functions for data processing:
 
 from sklearn.model_selection import train_test_split
 
-def data_preprocess(df, config:dict, ref_month='m5', train_if=True):
+
+def data_preprocess(df, config: dict, ref_month="m5", train_if=True):
     """
     Preprocess data and split into payer/non-payer groups for each prediction day.
 
     - Parameters:
         - df (pd.DataFrame): Input DataFrame with features and targets
-        - config (dict): 
+        - config (dict):
             - num_features/cat_features (list): Numerical/categorical feature names
             - target_col (list): Target column names
             - id_col (str): User ID column
             - payer_tag (list[str]): Column names indicating payer status
         - ref_month (str): Key of the refrence month
         - train_if (bool): If True, split data into train/valid sets, default: True
-        
+
     - Returns:
         - Dict with 'train'/'valid' keys, each containing:
             {
@@ -31,7 +32,7 @@ def data_preprocess(df, config:dict, ref_month='m5', train_if=True):
                 "payer": (features, target)
             }
         -  target_num (int): Numbers of predicted cycles
-            
+
     """
     num_features = config["num_features_map"][ref_month]
     cat_features = config["cat_features"]
@@ -42,7 +43,7 @@ def data_preprocess(df, config:dict, ref_month='m5', train_if=True):
     x_df = df[num_features + cat_features]
     y_df = df[target_col]
     user_ids = df[id_col]
-    
+
     target_num = y_df.shape[1]
     # transform type: category
     for col in cat_features:
@@ -59,23 +60,19 @@ def data_preprocess(df, config:dict, ref_month='m5', train_if=True):
 
     result = {"train": {}, "valid": {}}
     # Split into payer vs non-payer
-    x_train_1, x_train_2, y_train_1, y_train_2 = paid_split(
-            x_train, y_train, payer_tag
-        )
-    x_valid_1, x_valid_2, y_valid_1, y_valid_2 = paid_split(
-            x_valid, y_valid, payer_tag
-        )
+    x_train_1, x_train_2, y_train_1, y_train_2 = paid_split(x_train, y_train, payer_tag)
+    x_valid_1, x_valid_2, y_valid_1, y_valid_2 = paid_split(x_valid, y_valid, payer_tag)
     result["train"] = {
-            "all": (x_train, y_train, id_train),
-            "nonpayer": (x_train_1, y_train_1),
-            "payer": (x_train_2, y_train_2),
-        }
+        "all": (x_train, y_train, id_train),
+        "nonpayer": (x_train_1, y_train_1),
+        "payer": (x_train_2, y_train_2),
+    }
 
     result["valid"] = {
-            "all": (x_valid, y_valid, id_valid),
-            "nonpayer": (x_valid_1, y_valid_1),
-            "payer": (x_valid_2, y_valid_2),
-        }
+        "all": (x_valid, y_valid, id_valid),
+        "nonpayer": (x_valid_1, y_valid_1),
+        "payer": (x_valid_2, y_valid_2),
+    }
 
     return result, target_num
 
@@ -88,10 +85,10 @@ def paid_split(x_df, y_df, payer_tag):
         - x_df (pd.DataFrame): Input dataset including features
         - y_df (pd.DataFrame): Input dataset including targets
         - payer_tag (list[str]): Column names indicating payer status
-    
+
     - Returns (tuple): 4 dataframes, Split datasets
     """
-    
+
     existing_payer_tag = [col for col in payer_tag if col in x_df.columns]
     if not existing_payer_tag:
         raise ValueError(

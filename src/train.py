@@ -15,11 +15,12 @@ from sklearn.metrics import (
     r2_score,
 )
 
-def train_clf(train_data, valid_data, config:dict):
+
+def train_clf(train_data, valid_data, config: dict):
     """
     Build the Binary Classifier Model by LightGBM
     Predict whether a breakthrough payment will occur in the subsequent period
-    
+
     - Parameters:
         - train_data (tuple(pd.DataFrame, pd.Series)):
             - x_train
@@ -30,7 +31,7 @@ def train_clf(train_data, valid_data, config:dict):
         - config (dict):
             - payer_tag
             - params_clf: Args in the classifier model
-    
+
     - return: Model and model performance evaluation
     """
     x_train, y_train = train_data
@@ -98,6 +99,7 @@ def r2_eval(preds, train_data):
     labels = train_data.get_label()
     return "r2", r2_score(labels, preds), True
 
+
 def combined_objective(y_true, y_pred, alpha=0.7):
     """
     Combined loss function: balances total sum difference and individual prediction quality.
@@ -107,17 +109,18 @@ def combined_objective(y_true, y_pred, alpha=0.7):
     sum_diff = np.sum(y_pred) - np.sum(y_true)
     sum_grad = np.full_like(y_pred, 2 * alpha * sum_diff)
     sum_hess = np.full_like(y_pred, 2 * alpha)
-    
+
     # 2. Individual prediction error (MSE)
     residual = y_pred - y_true
     mse_grad = 2 * (1 - alpha) * residual
     mse_hess = np.full_like(y_pred, 2 * (1 - alpha))
-    
+
     # Combine gradients
     grad = sum_grad + mse_grad
     hess = sum_hess + mse_hess
-    
+
     return grad, hess
+
 
 # Dynamically adjust weight during training
 def adaptive_objective(y_true, y_pred):
@@ -128,12 +131,13 @@ def adaptive_objective(y_true, y_pred):
     context = lgb.basic._get_callback_context()
     current_iter = context["iteration"]
     total_iter = context["end_iteration"]
-    
+
     # Increase alpha as training progresses
     progress = current_iter / max(total_iter, 1)
     alpha = min(0.8, 0.2 + 0.6 * progress)
-    
+
     return combined_objective(y_true, y_pred, alpha)
+
 
 def calibrate_predictions(model, X_train, y_train, X_test):
     """
@@ -143,26 +147,26 @@ def calibrate_predictions(model, X_train, y_train, X_test):
     # Original predictions
     train_pred = model.predict(X_train)
     test_pred = model.predict(X_test)
-    
+
     # Compute sum difference on training set
     total_diff = np.sum(y_train) - np.sum(train_pred)
-    
+
     # Scale adjustment by dataset sizes
     n_train = len(y_train)
     n_test = len(X_test)
     adjustment = total_diff * (n_test / n_train) / n_test
-    
+
     # Apply adjustment to test predictions
     calibrated_pred = test_pred + adjustment
-    
+
     return calibrated_pred
 
 
-def train_reg(train_data, valid_data, config:dict, value_weighting=True):
+def train_reg(train_data, valid_data, config: dict, value_weighting=True):
     """
     Build the Regression Model by LightGBM
     Predict the value of payment will occur in the subsequent period
-    
+
     - Parameters:
         - train_data (tuple(pd.DataFrame, pd.Series)):
             - x_train
@@ -177,7 +181,7 @@ def train_reg(train_data, valid_data, config:dict, value_weighting=True):
             - base_weights: weights for different pay types
             - top_num: numbers of the whale
         - value_weighting: If True, weigth the samples, default: True
-        
+
     - return: Model and model performance evaluation
     """
     x_train, y_train = train_data
@@ -246,7 +250,6 @@ def train_reg(train_data, valid_data, config:dict, value_weighting=True):
         ],
     )  # Equivalent to verbose_eval=100
 
-   
     # Predict log values
     y_preds_log = reg.predict(x_valid, num_iteration=reg.best_iteration)
     # Restore log and correct negative values
@@ -263,24 +266,24 @@ def train_reg(train_data, valid_data, config:dict, value_weighting=True):
 
 def train_process(
     result_df,
-    config:dict,
+    config: dict,
 ):
     """
     The binary classification model determines future payment behavior
     The regression model predicts future LTV
-    
+
     Parameters:
     - resultd_df: the original and splited datsset
     - config:
         - params_clf:
         - params_reg
-    
+
     """
     x_train_1, y_train_1 = result_df["train"]["nonpayer"]
     x_train_2, y_train_2 = result_df["train"]["payer"]
     x_valid_1, y_valid_1 = result_df["valid"]["nonpayer"]
     x_valid_2, y_valid_2 = result_df["valid"]["payer"]
-   
+
     payer_tag = config["payer_tag"]
     # Check if the validation set is empty
     # The purpose is to train only, without validation
@@ -294,7 +297,7 @@ def train_process(
         # print("Train only, no validation")
 
     # Train the classification model on the dataset of players who have not paid during the feature period
-    clf_valid, result_valid_clf= train_clf(
+    clf_valid, result_valid_clf = train_clf(
         result_df["train"]["nonpayer"], result_df["valid"]["nonpayer"], config
     )
 
@@ -338,7 +341,9 @@ def train_process(
     y_combined_valid = pd.concat([y_valid_1[mask_payfu_2], y_valid_2], axis=0)
 
     reg_valid, result_valid_reg, importance_reg = train_reg(
-        (x_combined_train, y_combined_train), (x_combined_valid, y_combined_valid), config
+        (x_combined_train, y_combined_train),
+        (x_combined_valid, y_combined_valid),
+        config,
     )
     model_result = {
         "model_clf": clf_valid,

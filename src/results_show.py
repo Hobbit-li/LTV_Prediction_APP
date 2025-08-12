@@ -5,6 +5,7 @@ Contains functions for displaying and analyzing model results
 Including ROAS and LTV (Aggregated indicators)
 """
 
+
 def show_roas_ltv(preds_results, cost, existed_tag, cycles=10):
     """
     Evaluate predicted vs. actual ROAS and LTV values
@@ -43,8 +44,8 @@ def show_roas_ltv(preds_results, cost, existed_tag, cycles=10):
             "LTV_actual": ltv_actual,
         }
         try:
-            y_pred = y_pred + preds_results[i+1]["pred"]
-            y_actual = y_actual + preds_results[i+1]["actual"]
+            y_pred = y_pred + preds_results[i + 1]["pred"]
+            y_actual = y_actual + preds_results[i + 1]["actual"]
         except (IndexError, KeyError):
             raise IndexError(f"index i={i+1} not exists in preds_results.")
     return result
