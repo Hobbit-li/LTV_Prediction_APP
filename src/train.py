@@ -8,6 +8,7 @@ import logging
 import pandas as pd
 import numpy as np
 import lightgbm as lgb
+from lightgbm import basic
 from sklearn.metrics import (
     classification_report,
     roc_auc_score,
@@ -102,8 +103,9 @@ def r2_eval(preds, train_data):
 
 def combined_objective(y_true, y_pred, alpha=0.7):
     """
-    Combined loss function: balances total sum difference and individual prediction quality.
-    alpha: weight for total sum difference component (range: 0–1)
+    - Combined loss function: 
+        - balances total sum difference and individual prediction quality
+        - alpha: weight for total sum difference component (range: 0–1)
     """
     # 1. Total sum difference component
     sum_diff = np.sum(y_pred) - np.sum(y_true)
@@ -139,21 +141,21 @@ def adaptive_objective(y_true, y_pred):
     return combined_objective(y_true, y_pred, alpha)
 
 
-def calibrate_predictions(model, X_train, y_train, X_test):
+def calibrate_predictions(model, x_train, y_train, x_test):
     """
     Post-training calibration: adjust predictions so that the sum of predicted values
     equals the sum of the actual values in the training set.
     """
     # Original predictions
-    train_pred = model.predict(X_train)
-    test_pred = model.predict(X_test)
+    train_pred = model.predict(x_train)
+    test_pred = model.predict(x_test)
 
     # Compute sum difference on training set
     total_diff = np.sum(y_train) - np.sum(train_pred)
 
     # Scale adjustment by dataset sizes
     n_train = len(y_train)
-    n_test = len(X_test)
+    n_test = len(x_test)
     adjustment = total_diff * (n_test / n_train) / n_test
 
     # Apply adjustment to test predictions
@@ -225,8 +227,6 @@ def train_reg(train_data, valid_data, config: dict, value_weighting=True):
     # logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
     counts = pd.value_counts(train_weights, sort=False)
     logging.info("Train weight counts:\n%s", counts.to_string())
-
-    features = num_features + cat_features
 
     # Wrap dataset
     trn_data = lgb.Dataset(
