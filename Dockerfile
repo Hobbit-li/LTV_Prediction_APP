@@ -1,16 +1,25 @@
 FROM python:3.10-slim
 
-# install dependencies
-RUN apt-get update && apt-get install -y \
+# 设置工作目录
+WORKDIR /app
+
+# 安装系统依赖，只在第一次构建需要编译 LightGBM
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     libgomp1 \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-
+# 先复制 requirements.txt 并安装依赖（利用 Docker 缓存）
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 
-# default: main.py
+# 使用国内源加速 pip 安装
+RUN pip install --upgrade pip \
+    && pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir -r requirements.txt
+
+# 再复制整个项目代码，方便实时挂载调试
+COPY . .
+
+# 默认工作命令，可用 docker-compose 覆盖为交互模式
 CMD ["python", "main.py"]
