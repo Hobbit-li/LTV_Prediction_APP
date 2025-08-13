@@ -72,7 +72,7 @@ def main():
 
     for i in range(pre_cycles):
 
-        result_copy = temp_result.copy()
+        result_copy = temp_result
         for split in ["train", "valid"]:
             for group in result_copy[split]:
                 x, y, *rest = result_copy[split][group]
