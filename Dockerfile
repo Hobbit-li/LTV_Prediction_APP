@@ -15,9 +15,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # 先复制 requirements.txt 并安装依赖（利用 Docker 缓存）
 COPY requirements.txt .
 
-# 使用国内源加速 pip 安装
+# 使用阿里云镜像加速安装
 RUN pip install --upgrade pip \
-    && pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir -r requirements.txt
+    && pip install -i https://mirrors.aliyun.com/pypi/simple --no-cache-dir -r requirements.txts
 
 # 再复制整个项目代码，方便实时挂载调试
 COPY . .
