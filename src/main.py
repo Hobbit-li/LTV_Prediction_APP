@@ -115,7 +115,7 @@ def main():
     test_df = pd.read_csv(path_pre, compression="gzip")
     test_df.dropna(axis=1, how="all")
 
-    temp_result_test = data_preprocess(test_df, config, ref_month, train_if=False)
+    temp_result_test, _ = data_preprocess(test_df, config, ref_month, train_if=False)
 
     preds_results = {}
     adjust_preds_results = {}
