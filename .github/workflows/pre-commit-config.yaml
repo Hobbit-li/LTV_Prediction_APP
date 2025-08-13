@@ -40,4 +40,4 @@ jobs:
 
       - name: Run Pylint (code quality)
         run: |
-          pylint src/ --disable=C0116,R0913 || true
+          pylint src/ --disable=C0116,R0913,R0914 || true
