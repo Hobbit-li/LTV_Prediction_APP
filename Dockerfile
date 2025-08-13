@@ -1,3 +1,4 @@
+# 使用轻量级 Python 镜像
 FROM python:3.10-slim
 
 # 设置工作目录
