@@ -23,4 +23,4 @@ RUN pip install --upgrade pip \
 COPY . .
 
 # 默认工作命令，可用 docker-compose 覆盖为交互模式
-CMD ["python", "main.py"]
+CMD ["python", "src/main.py"]
