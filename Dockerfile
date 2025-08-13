@@ -17,7 +17,7 @@ COPY requirements.txt .
 
 # 使用阿里云镜像加速安装
 RUN pip install --upgrade pip \
-    && pip install -i https://mirrors.aliyun.com/pypi/simple --no-cache-dir -r requirements.txts
+    && pip install -i https://mirrors.aliyun.com/pypi/simple --no-cache-dir -r requirements.txt
 
 # 再复制整个项目代码，方便实时挂载调试
 COPY . .
