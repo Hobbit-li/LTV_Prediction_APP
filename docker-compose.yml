@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .       # 当前目录
+      dockerfile: Dockerfile
+    container_name: my_ltv_app
+    working_dir: /app
+    volumes:
+      - .:/app         # 挂载本地代码到容器
+    command: python main.py
+    tty: true          # 允许交互调试
+    stdin_open: true   # 保持 STDIN 打开
