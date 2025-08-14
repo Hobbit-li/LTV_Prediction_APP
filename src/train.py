@@ -132,13 +132,15 @@ def adaptive_objective(y_true, y_pred):
     """
     alpha = getattr(lgb.basic._Booster__, "alpha", 0.2)
     return combined_objective(y_true, y_pred, alpha)
-    
+
+
 def adaptive_alpha_callback(alpha_start=0.2, alpha_end=0.8):
     def _callback(env):
         progress = env.iteration / max(env.end_iteration, 1)
         alpha = min(alpha_end, alpha_start + (alpha_end - alpha_start) * progress)
         # save the current alpha
         setattr(env.model, "alpha", alpha)
+
     _callback.order = 10
     return _callback
 
