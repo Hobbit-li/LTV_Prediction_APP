@@ -130,38 +130,40 @@ def adaptive_objective(y_true, y_pred):
     Focus more on individual prediction in early training,
     and gradually shift to minimizing total sum difference.
     """
-    context = lgb.basic._get_callback_context()
-    current_iter = context["iteration"]
-    total_iter = context["end_iteration"]
-
-    # Increase alpha as training progresses
-    progress = current_iter / max(total_iter, 1)
-    alpha = min(0.8, 0.2 + 0.6 * progress)
-
+    alpha = getattr(lgb.basic._Booster__, "alpha", 0.2)
     return combined_objective(y_true, y_pred, alpha)
+    
+def adaptive_alpha_callback(alpha_start=0.2, alpha_end=0.8):
+    def _callback(env):
+        progress = env.iteration / max(env.end_iteration, 1)
+        alpha = min(alpha_end, alpha_start + (alpha_end - alpha_start) * progress)
+        # save the current alpha
+        setattr(env.model, "alpha", alpha)
+    _callback.order = 10
+    return _callback
 
 
-def calibrate_predictions(model, x_train, y_train, x_test):
-    """
-    Post-training calibration: adjust predictions so that the sum of predicted values
-    equals the sum of the actual values in the training set.
-    """
-    # Original predictions
-    train_pred = model.predict(x_train)
-    test_pred = model.predict(x_test)
+# def calibrate_predictions(model, x_train, y_train, x_test):
+#     """
+#     Post-training calibration: adjust predictions so that the sum of predicted values
+#     equals the sum of the actual values in the training set.
+#     """
+#     # Original predictions
+#     train_pred = model.predict(x_train)
+#     test_pred = model.predict(x_test)
 
-    # Compute sum difference on training set
-    total_diff = np.sum(y_train) - np.sum(train_pred)
+#     # Compute sum difference on training set
+#     total_diff = np.sum(y_train) - np.sum(train_pred)
 
-    # Scale adjustment by dataset sizes
-    n_train = len(y_train)
-    n_test = len(x_test)
-    adjustment = total_diff * (n_test / n_train) / n_test
+#     # Scale adjustment by dataset sizes
+#     n_train = len(y_train)
+#     n_test = len(x_test)
+#     adjustment = total_diff * (n_test / n_train) / n_test
 
-    # Apply adjustment to test predictions
-    calibrated_pred = test_pred + adjustment
+#     # Apply adjustment to test predictions
+#     calibrated_pred = test_pred + adjustment
 
-    return calibrated_pred
+#     return calibrated_pred
 
 
 def train_reg(train_data, valid_data, config: dict, value_weighting=True):
