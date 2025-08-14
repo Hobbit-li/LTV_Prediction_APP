@@ -101,7 +101,7 @@ def r2_eval(preds, train_data):
     return "r2", r2_score(labels, preds), True
 
 
-def combined_objective(y_true, y_pred, alpha=0.7):
+def combined_objective(y_pred, y_true, alpha=0.7):
     """
     - Combined loss function:
         - balances total sum difference and individual prediction quality
@@ -134,12 +134,12 @@ def make_adaptive_objective(alpha_start=0.2, alpha_end=0.8):
     alpha_container = {"alpha": alpha_start}  # 初始 alpha
 
     # Custom objective reads alpha from the container
-    def fobj(y_true, y_pred):
+    def fobj(y_pred, y_true):
         try:
             y_true = y_true.get_label()
         except AttributeError:
             y_true = np.array(y_true)
-        return combined_objective(y_true, y_pred, alpha_container["alpha"])
+        return combined_objective(y_pred, y_true, alpha_container["alpha"])
 
     # Callback to update alpha per iteration
     def callback(env):
