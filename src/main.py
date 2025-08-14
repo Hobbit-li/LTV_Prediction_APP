@@ -100,7 +100,7 @@ def main():
     model_results = {}
     for i in range(pre_cycles):
         logging.debug(f"Training cycle {i}")
-        result_copy = temp_result
+        result_copy = copy.deepcopy(temp_result)
         for split in ["train", "valid"]:
             for group in result_copy[split]:
                 x, y, *rest = result_copy[split][group]
