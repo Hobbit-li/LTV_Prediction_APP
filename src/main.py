@@ -138,12 +138,23 @@ def main():
         for group in ["all", "nonpayer", "payer"]:
             x, y, *rest = result_test_copy["valid"][group]
             x1, y1, *rest1 = result_copy["valid"][group]
+            # 处理 y
             try:
-                y = y.iloc[:, i].fillna(0)
-                y1 = y1.iloc[:, i].fillna(0)
-            except AttributeError:
-                y = [row[0] for row in y]
-                y1 = [row[0] for row in y1]
+                if hasattr(y, "iloc") and i < y.shape[1]:
+                    y = y.iloc[:, i].fillna(0)
+                else:
+                    y = pd.Series([0]*len(y))
+            except Exception:
+                y = pd.Series([0]*len(y))
+            # 处理 y1
+            try:
+                if hasattr(y1, "iloc") and i < y1.shape[1]:
+                    y1 = y1.iloc[:, i].fillna(0)
+                else:
+                    y1 = pd.Series([0]*len(y1))
+            except Exception:
+                y1 = pd.Series([0]*len(y1))
+            
             result_test_copy["valid"][group] = (x, y, *rest) if rest else (x, y)
             result_copy["valid"][group] = (x1, y1, *rest1) if rest else (x1, y1)
 
