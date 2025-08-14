@@ -142,6 +142,7 @@ def make_adaptive_objective(alpha_start=0.2, alpha_end=0.8):
         progress = env.iteration / max(env.end_iteration, 1)
         alpha = min(alpha_end, alpha_start + (alpha_end - alpha_start) * progress)
         alpha_container["alpha"] = alpha
+
     callback.order = 10  # 在其他 callback 之前或之后调用，可按需调整
 
     return fobj, callback
