@@ -225,25 +225,28 @@ def main():
     re_dict = evaluate_ltv(preds_results, pre_cycles)
     re_dict_adjust = evaluate_ltv(adjust_preds_results, pre_cycles)
 
-    # 保存 LTV metrics
-    for name, df_metric in zip(["ltv", "ltv_adjusted"], [re_dict, re_dict_adjust]):
-        json_path = output_dir / f"{name}.json"
-        df_metric.to_json(json_path, orient="records", force_ascii=False, indent=2)
-        logging.info(f"Saved {name} metric JSON: {json_path}")
-
     # Show ROAS LTV
     roas_results = show_roas_ltv(preds_results, cost, config["payer_tag"], pre_cycles)
     roas_results_adjust = show_roas_ltv(
         adjust_preds_results, cost, config["payer_tag"], pre_cycles
     )
+    all_metrics = {}
 
-    # 保存 ROAS metrics
-    for name, df_metric in zip(
-        ["roas", "roas_adjusted"], [roas_results, roas_results_adjust]
-    ):
-        json_path = output_dir / f"{name}.json"
-        df_metric.to_json(json_path, orient="records", force_ascii=False, indent=2)
-        logging.info(f"Saved {name} metric JSON: {json_path}")
+    # LTV metrics
+    all_metrics["ltv"] = re_dict.to_dict(orient="records")
+    all_metrics["ltv_adjusted"] = re_dict_adjust.to_dict(orient="records")
+    
+    # ROAS metrics
+    all_metrics["roas"] = roas_results.to_dict(orient="records")
+    all_metrics["roas_adjusted"] = roas_results_adjust.to_dict(orient="records")
+    
+    # save as a json file
+    json_path = output_dir / "metrics_all.json"
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(all_metrics, f, ensure_ascii=False, indent=2)
+
+    logging.info(f"Saved all metrics JSON: {json_path}")
+    
 
     # ==============================
     # Step 10: Save residual plots
