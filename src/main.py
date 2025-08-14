@@ -63,7 +63,7 @@ def main():
     logging.debug(f"DataFrame head:\n{df.head()}")
 
     ref_month = "m5"
-    cost = 10000
+    cost = 1234992
 
     # ==============================
     # Step 3: Data preprocessing
