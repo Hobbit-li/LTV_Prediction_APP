@@ -1,6 +1,16 @@
 name: LTV CI/CD Pipeline
 
 on:
+  workflow_dispatch:
+    inputs:
+      ref_month:
+        description: 'Reference month for preprocessing'
+        required: true
+        default: 'm5'
+      debug:
+        description: 'Enable debug mode (true/false)'
+        required: false
+        default: 'true'
   push:
     paths:
       - 'src/**'
