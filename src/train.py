@@ -125,24 +125,26 @@ def combined_objective(y_true, y_pred, alpha=0.7):
 
 
 # Dynamically adjust weight during training
-def adaptive_objective(y_true, y_pred):
+def make_adaptive_objective(alpha_start=0.2, alpha_end=0.8):
     """
-    Focus more on individual prediction in early training,
-    and gradually shift to minimizing total sum difference.
+    Returns:
+        fobj: custom objective function
+        callback: LightGBM callback to update alpha each iteration
     """
-    alpha = getattr(lgb.basic._Booster__, "alpha", 0.2)
-    return combined_objective(y_true, y_pred, alpha)
+    alpha_container = {"alpha": alpha_start}  # 初始 alpha
 
+    # Custom objective reads alpha from the container
+    def fobj(y_true, y_pred):
+        return combined_objective(y_true, y_pred, alpha_container["alpha"])
 
-def adaptive_alpha_callback(alpha_start=0.2, alpha_end=0.8):
-    def _callback(env):
+    # Callback to update alpha per iteration
+    def callback(env):
         progress = env.iteration / max(env.end_iteration, 1)
         alpha = min(alpha_end, alpha_start + (alpha_end - alpha_start) * progress)
-        # save the current alpha
-        setattr(env.model, "alpha", alpha)
+        alpha_container["alpha"] = alpha
+    callback.order = 10  # 在其他 callback 之前或之后调用，可按需调整
 
-    _callback.order = 10
-    return _callback
+    return fobj, callback
 
 
 # def calibrate_predictions(model, x_train, y_train, x_test):
@@ -242,6 +244,7 @@ def train_reg(train_data, valid_data, config: dict, value_weighting=True):
     val_data = lgb.Dataset(
         x_valid, label=y_valid_log, categorical_feature=cat_features, reference=trn_data
     )
+    adaptive_objective, adaptive_alpha_callback = make_adaptive_objective()
     reg = lgb.train(
         params_reg,
         trn_data,
@@ -251,7 +254,7 @@ def train_reg(train_data, valid_data, config: dict, value_weighting=True):
         callbacks=[
             lgb.early_stopping(stopping_rounds=50),
             lgb.log_evaluation(period=500),
-            adaptive_alpha_callback(),
+            adaptive_alpha_callback,
         ],
     )  # Equivalent to verbose_eval=100
 
