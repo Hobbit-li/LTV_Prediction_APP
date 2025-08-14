@@ -2,7 +2,7 @@ numpy
 pandas
 tqdm
 scikit-learn
-lightgbm>=3.3.0
+lightgbm==3.3.5
 pyyaml
 joblib
 matplotlib
