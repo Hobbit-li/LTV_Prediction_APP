@@ -66,13 +66,13 @@ def evaluate_ltv(preds_results, cycles=10):
         y_true = preds_results[i]["actual"].values
         y_pred = preds_results[i]["pred"].values
         rmse = mean_squared_error(y_true, y_pred)
-        # mae = mean_absolute_error(y_true, y_pred)
-        msle = mean_squared_log_error(y_true, y_pred)
+        mae = mean_absolute_error(y_true, y_pred)
+        # msle = mean_squared_log_error(y_true, y_pred)
         r2 = r2_score(y_true, y_pred)
 
         eval_dict[f"Follow_Mon_{i}"] = {
             "RMSE": round(rmse, 4),
-            "MSLE": round(msle, 4),
+            "MAE": round(mAE, 4),
             "R2": round(r2, 4),
         }
         return eval_dict
