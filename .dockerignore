@@ -1,0 +1,37 @@
+# 忽略版本控制文件
+.git
+.gitignore
+
+# 忽略本地开发配置
+.devcontainer
+.vscode
+
+# 忽略 GitHub Actions、CI/CD 配置
+.github
+
+# 保留 data/ 目录，但忽略其中的大型或临时文件
+data/*.tmp
+data/*.log
+data/*.7z
+data/__pycache__/
+
+# 忽略 outputs（运行结果通常不需要打包进镜像）
+outputs/
+
+# 忽略临时文件和缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.tmp
+
+# 忽略 Jupyter Notebook 检查点
+.ipynb_checkpoints
+
+# 忽略系统文件
+.DS_Store
+Thumbs.db
+
+# 忽略 README 和文档（如果不需要打包）
+README.md
