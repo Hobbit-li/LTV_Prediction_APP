@@ -75,7 +75,7 @@ def evaluate_ltv(preds_results, cycles=10):
             "MAE": round(mae, 4),
             "R2": round(r2, 4),
         }
-        return eval_dict
+    return eval_dict
 
 
 # Residual analysis
