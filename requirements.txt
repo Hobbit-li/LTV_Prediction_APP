@@ -8,3 +8,4 @@ joblib
 matplotlib
 black
 pylint
+openpyxl>=3.1.0
