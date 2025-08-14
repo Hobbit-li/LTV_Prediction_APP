@@ -8,14 +8,11 @@ Orchestrates the full model pipeline:
 4. Result evaluation
 """
 
-# from IPython.display import Image
-# Image("/kaggle/input/process-image/deepseek_mermaid_20250613_79aa76.png", width=500)
-# import necessary packages
 from pathlib import Path
 import logging
+import sys
 import warnings
 import pandas as pd
-
 
 # Local application/library specific imports
 from config_loader import load_config
@@ -23,55 +20,65 @@ from data_utils import data_preprocess
 from predict import predict_process
 from results_show import show_roas_ltv
 from train import train_process
-
-# from utils_io import create_output_dir, save_metrics, save_model, save_predictions
 from utils_io import create_output_dir, save_metrics, save_predictions
 from visual import compare_plot, evaluate_ltv, residual_plot
 
+# ==============================
+# Logging Setup
+# ==============================
+logs_path = Path(__file__).parent.parent / "logs"
+logs_path.mkdir(exist_ok=True)
+
+logging.basicConfig(
+    level=logging.DEBUG,  # INFO 或 DEBUG 可根据需求调整
+    format="%(asctime)s | %(levelname)s | %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler(logs_path / "main_debug.log", mode="w")
+    ]
+)
+
 
 def main():
-    """
-    Steps:
-    1. Load configuration
-    2. Preprocess data
-    3. Train models
-    4. Generate predictions
-    5. Evaluate performance
-    """
-    # Configuration
     warnings.simplefilter("ignore")
-    # params load
-    config = load_config()
-    # load the historical referrence data
-    path_ref = (
-        Path(__file__).parent.parent / "data" / "20250812_100327_09062_tej97.csv.gz"
-    )
-    df = pd.read_csv(path_ref, compression="gzip")
-    df.dropna(axis=1, how="all")
 
-    # path_ref = config["path_ref"]
-    # df = pd.read_csv(path_ref)
-    # df.fillna(0, inplace=True)
+    # ==============================
+    # Step 1: Load configuration
+    # ==============================
+    logging.info("Step 1: Load configuration")
+    config = load_config()
+
+    # ==============================
+    # Step 2: Load reference data
+    # ==============================
+    logging.info("Step 2: Load reference data")
+    path_ref = Path(__file__).parent.parent / "data" / "20250812_100327_09062_tej97.csv.gz"
+    df = pd.read_csv(path_ref, compression="gzip")
+    df.dropna(axis=1, how="all", inplace=True)
 
     buffer = []
     df.info(buf=buffer.append)
     logging.info("DataFrame Info:\n" + "\n".join(buffer))
-
     logging.info("DataFrame Describe:\n%s", df.describe().to_string())
-    # logging.info(f"Data shape: {df.shape}")
-    # logging.debug(f"\n{df.head()}")  # only works under the debug state
-    # print(df.shape)
-    # df.head()
+    logging.debug(f"DataFrame head:\n{df.head()}")
 
     ref_month = "m5"
     cost = 10000
-    # store the all splited datesets
+
+    # ==============================
+    # Step 3: Data preprocessing
+    # ==============================
+    logging.info("Step 3: Data preprocessing")
     temp_result, pre_cycles = data_preprocess(df, config, ref_month)
-    # train process
+    logging.info(f"Preprocessing done, pre_cycles={pre_cycles}")
+
+    # ==============================
+    # Step 4: Training models
+    # ==============================
+    logging.info("Step 4: Training models")
     model_results = {}
-
     for i in range(pre_cycles):
-
+        logging.debug(f"Training cycle {i}")
         result_copy = temp_result
         for split in ["train", "valid"]:
             for group in result_copy[split]:
@@ -80,59 +87,39 @@ def main():
                     y = y.iloc[:, i]  # if dataframe
                 except AttributeError:
                     y = [row[0] for row in y]  # if list
-
                 result_copy[split][group] = (x, y, *rest) if rest else (x, y)
+        model_results[i] = train_process(result_copy, config)
 
-        # day_features = num_features_map[day]
-        model_results[i] = train_process(
-            result_copy,
-            config,
-        )
-
-    # retrain the model using valid data
-    model_test = {}
-    model_test = model_results
-    # params_clf = config["params_clf"]
-    # params_reg = config["params_reg"]
-
-    # for day, res in model_results.items():
-    #     params_clf["num_iterations"] = res["model_clf"].best_iteration
-    #     params_reg["num_iterations"] = res["model_reg"].best_iteration
-
-    #     x_clf, y_clf = temp_result["valid"][day]["nonpayer"]
-
-    #     x_reg, y_reg = temp_result["valid"][day]["payer"]
-
-    #     model_test[day] = train_process(
-    #         x_clf, x_clf, x_reg, x_reg, y_clf, y_clf, y_reg, y_reg, config
-    #     )
-
-    # load the test data
-    path_pre = (
-        Path(__file__).parent.parent / "data" / "20250812_100210_09037_tej97.csv.gz"
-    )
-
+    # ==============================
+    # Step 5: Prepare test data
+    # ==============================
+    logging.info("Step 5: Preparing test data")
+    path_pre = Path(__file__).parent.parent / "data" / "20250812_100210_09037_tej97.csv.gz"
     test_df = pd.read_csv(path_pre, compression="gzip")
-    test_df.dropna(axis=1, how="all")
-
+    test_df.dropna(axis=1, how="all", inplace=True)
     temp_result_test, _ = data_preprocess(test_df, config, ref_month, train_if=False)
 
+    # ==============================
+    # Step 6: Generate predictions
+    # ==============================
+    logging.info("Step 6: Generating predictions")
     preds_results = {}
     adjust_preds_results = {}
+    model_test = model_results
+
     for i in range(pre_cycles):
-        # use the "valid" data to predict
+        logging.debug(f"Prediction cycle {i}")
         result_test_copy = temp_result_test
         result_copy = temp_result
         for group in ["all", "nonpayer", "payer"]:
             x, y, *rest = result_test_copy["valid"][group]
             x1, y1, *rest1 = result_copy["valid"][group]
             try:
-                y = y.iloc[:, i]  # if dataframe
+                y = y.iloc[:, i]
                 y1 = y1.iloc[:, i]
             except AttributeError:
-                y = [row[0] for row in y]  # if list
+                y = [row[0] for row in y]
                 y1 = [row[0] for row in y1]
-
             result_test_copy["valid"][group] = (x, y, *rest) if rest else (x, y)
             result_copy["valid"][group] = (x1, y1, *rest1) if rest else (x1, y1)
 
@@ -143,7 +130,6 @@ def main():
             config,
         )
 
-        # adjustment
         preds_train = predict_process(
             result_copy,
             model_test[i]["model_clf"],
@@ -156,29 +142,92 @@ def main():
         adjust_preds_results[i] = preds_results[i].copy()
         adjust_preds_results[i]["pred"] = adjust_preds_results[i]["pred"] - adjustment
 
-        # print(preds_results[day].head())
-        # preds_results[day].to_csv(
-        #     f"prediction_results_DA_DAY{day}.csv", index=False, encoding="utf-8-sig"
-        # )
-    save_predictions(preds_results, create_output_dir())
+    # ==============================
+    # Step 7: Save predictions
+    # ==============================
+    logging.info("Step 7: Saving predictions")
+    output_dir = create_output_dir()
+    output_dir.mkdir(exist_ok=True, parents=True)
+
+    for i, df_pred in preds_results.items():
+        csv_path = output_dir / f"predictions_cycle_{i}.csv"
+        df_pred.to_csv(csv_path, index=False, encoding="utf-8-sig")
+        logging.info(f"Saved predictions CSV: {csv_path}")
+
+    excel_path = output_dir / "predictions_all.xlsx"
+    with pd.ExcelWriter(excel_path) as writer:
+        for i, df_pred in preds_results.items():
+            df_pred.to_excel(writer, sheet_name=f"cycle_{i}", index=False)
+    logging.info(f"Saved all predictions Excel: {excel_path}")
+
+    # ==============================
+    # Step 8: Save plots
+    # ==============================
+    logging.info("Step 8: Generating and saving plots")
+    plots_dir = output_dir / "plots"
+    plots_dir.mkdir(exist_ok=True)
 
     figs_com1 = compare_plot(preds_results, pre_cycles)
-    figs_com2 = compare_plot(adjust_preds_results, pre_cycles)
+    for i, fig in enumerate(figs_com1):
+        png_path = plots_dir / f"compare_plot_cycle_{i}.png"
+        fig.savefig(png_path, dpi=150)
+        logging.info(f"Saved compare plot PNG: {png_path}")
 
-    re_dict = {}
-    re_dict_adjust = {}
+    figs_com2 = compare_plot(adjust_preds_results, pre_cycles)
+    for i, fig in enumerate(figs_com2):
+        png_path = plots_dir / f"adjusted_compare_plot_cycle_{i}.png"
+        fig.savefig(png_path, dpi=150)
+        logging.info(f"Saved adjusted compare plot PNG: {png_path}")
+
+    # ==============================
+    # Step 9: Save LTV / ROAS metrics
+    # ==============================
+    logging.info("Step 9: Saving LTV and ROAS metrics")
+    
+    # Evaluate LTV
     re_dict = evaluate_ltv(preds_results, pre_cycles)
     re_dict_adjust = evaluate_ltv(adjust_preds_results, pre_cycles)
-    save_metrics(re_dict, create_output_dir())
-    save_metrics(re_dict_adjust, create_output_dir())
-
+    
+    # 保存 LTV metrics
+    for name, metrics_dict in zip(
+        ["ltv", "ltv_adjusted"], [re_dict, re_dict_adjust]
+    ):
+        for key, df_metric in metrics_dict.items():
+            csv_path = output_dir / f"{name}_{key}.csv"
+            df_metric.to_csv(csv_path, index=False, encoding="utf-8-sig")
+            logging.info(f"Saved {name} metric CSV: {csv_path}")
+    
+    # Show ROAS LTV
     roas_results = show_roas_ltv(preds_results, cost, config["payer_tag"], pre_cycles)
-    roas_results_adjust = show_roas_ltv(
-        adjust_preds_results, cost, config["payer_tag"], pre_cycles
-    )
-    save_metrics(roas_results, create_output_dir())
+    roas_results_adjust = show_roas_ltv(adjust_preds_results, cost, config["payer_tag"], pre_cycles)
+    
+    # 保存 ROAS metrics
+    for name, df_metric in zip(
+        ["roas", "roas_adjusted"], [roas_results, roas_results_adjust]
+    ):
+        csv_path = output_dir / f"{name}.csv"
+        df_metric.to_csv(csv_path, index=False, encoding="utf-8-sig")
+        logging.info(f"Saved {name} CSV: {csv_path}")
+    
+    # ==============================
+    # Step 10: Save residual plots
+    # ==============================
+    logging.info("Step 10: Saving residual plots")
+    residual_dir = output_dir / "residual_plots"
+    residual_dir.mkdir(exist_ok=True)
+    
     figs_res1 = residual_plot(preds_results, pre_cycles)
     figs_res2 = residual_plot(adjust_preds_results, pre_cycles)
+    
+    for i, fig in enumerate(figs_res1):
+        png_path = residual_dir / f"residual_plot_cycle_{i}.png"
+        fig.savefig(png_path, dpi=150)
+        logging.info(f"Saved residual plot PNG: {png_path}")
+    
+    for i, fig in enumerate(figs_res2):
+        png_path = residual_dir / f"residual_plot_adjusted_cycle_{i}.png"
+        fig.savefig(png_path, dpi=150)
+        logging.info(f"Saved adjusted residual plot PNG: {png_path}")
 
 
 if __name__ == "__main__":
