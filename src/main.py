@@ -143,17 +143,17 @@ def main():
                 if hasattr(y, "iloc") and i < y.shape[1]:
                     y = y.iloc[:, i].fillna(0)
                 else:
-                    y = pd.Series([0] * len(y))
+                    y = pd.Series([0] * len(y), index=y.index)
             except Exception:
-                y = pd.Series([0] * len(y))
+                y = pd.Series([0] * len(y), index=y.index)
             # 处理 y1
             try:
                 if hasattr(y1, "iloc") and i < y1.shape[1]:
                     y1 = y1.iloc[:, i].fillna(0)
                 else:
-                    y1 = pd.Series([0] * len(y1))
+                    y1 = pd.Series([0] * len(y1), index=y1.index)
             except Exception:
-                y1 = pd.Series([0] * len(y1))
+                y1 = pd.Series([0] * len(y1), index=y1.index)
 
             result_test_copy["valid"][group] = (x, y, *rest) if rest else (x, y)
             result_copy["valid"][group] = (x1, y1, *rest1) if rest else (x1, y1)
