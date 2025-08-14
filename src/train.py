@@ -60,15 +60,15 @@ def train_clf(train_data, valid_data, config: dict):
         valid_sets=[train_set, val_set],
         callbacks=[lgb.early_stopping(stopping_rounds=20)],
     )
-    fold_importance_df = pd.DataFrame()
-    fold_importance_df["Feature"] = list(x_tr.columns)
-    fold_importance_df["importance"] = clf.feature_importance()
-    fold_importance_df["importance_gain"] = clf.feature_importance(
-        importance_type="gain"
-    )
-    fold_importance_df = fold_importance_df.sort_values(
-        by="importance", ascending=False
-    )
+    # fold_importance_df = pd.DataFrame()
+    # fold_importance_df["Feature"] = list(x_tr.columns)
+    # fold_importance_df["importance"] = clf.feature_importance()
+    # fold_importance_df["importance_gain"] = clf.feature_importance(
+    #     importance_type="gain"
+    # )
+    # fold_importance_df = fold_importance_df.sort_values(
+    #     by="importance", ascending=False
+    # )
     # fold_importance_df.to_csv(f"importance_df_clf.csv", index=None)
 
     # print("Example of input feature matrix for classification prediction:", x_val)
@@ -353,7 +353,7 @@ def train_process(
     )
     y_combined_valid = pd.concat([y_valid_1[mask_payfu_2], y_valid_2], axis=0)
 
-    reg_valid, result_valid_reg, importance_reg = train_reg(
+    reg_valid, result_valid_reg = train_reg(
         (x_combined_train, y_combined_train),
         (x_combined_valid, y_combined_valid),
         config,
