@@ -72,7 +72,7 @@ def evaluate_ltv(preds_results, cycles=10):
 
         eval_dict[f"Follow_Mon_{i}"] = {
             "RMSE": round(rmse, 4),
-            "MAE": round(mAE, 4),
+            "MAE": round(mae, 4),
             "R2": round(r2, 4),
         }
         return eval_dict
