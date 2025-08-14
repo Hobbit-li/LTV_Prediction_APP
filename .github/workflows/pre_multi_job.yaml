@@ -79,13 +79,13 @@ jobs:
           echo "::endgroup::"
 
       - name: Upload logs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: main-debug-logs
           path: logs/
 
       - name: Upload model outputs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: model-outputs
           path: outputs/
