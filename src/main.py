@@ -230,7 +230,7 @@ def main():
         json_path = output_dir / f"{name}.json"
         df_metric.to_json(json_path, orient="records", force_ascii=False, indent=2)
         logging.info(f"Saved {name} metric JSON: {json_path}")
-            
+
     # Show ROAS LTV
     roas_results = show_roas_ltv(preds_results, cost, config["payer_tag"], pre_cycles)
     roas_results_adjust = show_roas_ltv(
