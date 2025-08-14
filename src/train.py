@@ -135,6 +135,8 @@ def make_adaptive_objective(alpha_start=0.2, alpha_end=0.8):
 
     # Custom objective reads alpha from the container
     def fobj(y_true, y_pred):
+        if isinstance(y_true, lgb.Dataset):
+            y_true = y_true.get_label()
         return combined_objective(y_true, y_pred, alpha_container["alpha"])
 
     # Callback to update alpha per iteration
