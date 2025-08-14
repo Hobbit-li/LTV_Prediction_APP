@@ -221,30 +221,30 @@ def main():
     # ==============================
     logging.info("Step 9: Saving LTV and ROAS metrics")
 
-    # Evaluate LTV
-    re_dict = evaluate_ltv(preds_results, pre_cycles)
-    re_dict_adjust = evaluate_ltv(adjust_preds_results, pre_cycles)
+    # # Evaluate LTV
+    # re_dict = evaluate_ltv(preds_results, pre_cycles)
+    # re_dict_adjust = evaluate_ltv(adjust_preds_results, pre_cycles)
 
-    # 保存 LTV metrics
-    for name, metrics_dict in zip(["ltv", "ltv_adjusted"], [re_dict, re_dict_adjust]):
-        for key, df_metric in metrics_dict.items():
-            csv_path = output_dir / f"{name}_{key}.csv"
-            df_metric.to_csv(csv_path, index=False, encoding="utf-8-sig")
-            logging.info(f"Saved {name} metric CSV: {csv_path}")
+    # # 保存 LTV metrics
+    # for name, metrics_dict in zip(["ltv", "ltv_adjusted"], [re_dict, re_dict_adjust]):
+    #     for key, df_metric in metrics_dict.items():
+    #         csv_path = output_dir / f"{name}_{key}.csv"
+    #         df_metric.to_csv(csv_path, index=False, encoding="utf-8-sig")
+    #         logging.info(f"Saved {name} metric CSV: {csv_path}")
 
-    # Show ROAS LTV
-    roas_results = show_roas_ltv(preds_results, cost, config["payer_tag"], pre_cycles)
-    roas_results_adjust = show_roas_ltv(
-        adjust_preds_results, cost, config["payer_tag"], pre_cycles
-    )
+    # # Show ROAS LTV
+    # roas_results = show_roas_ltv(preds_results, cost, config["payer_tag"], pre_cycles)
+    # roas_results_adjust = show_roas_ltv(
+    #     adjust_preds_results, cost, config["payer_tag"], pre_cycles
+    # )
 
-    # 保存 ROAS metrics
-    for name, df_metric in zip(
-        ["roas", "roas_adjusted"], [roas_results, roas_results_adjust]
-    ):
-        csv_path = output_dir / f"{name}.csv"
-        df_metric.to_csv(csv_path, index=False, encoding="utf-8-sig")
-        logging.info(f"Saved {name} CSV: {csv_path}")
+    # # 保存 ROAS metrics
+    # for name, df_metric in zip(
+    #     ["roas", "roas_adjusted"], [roas_results, roas_results_adjust]
+    # ):
+    #     csv_path = output_dir / f"{name}.csv"
+    #     df_metric.to_csv(csv_path, index=False, encoding="utf-8-sig")
+    #     logging.info(f"Saved {name} CSV: {csv_path}")
 
     # ==============================
     # Step 10: Save residual plots
