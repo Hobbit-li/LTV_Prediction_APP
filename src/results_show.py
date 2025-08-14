@@ -32,8 +32,8 @@ def show_roas_ltv(preds_results, cost, existed_tag, cycles=10):
     y_actual = preds_results[0]["actual"]
     for i in range(cycles):
         # df_temp = preds_results[i]
-        roas_pred = y_pred.sum() + ltv_existed.sum() / cost
-        roas_actual = y_actual.sum() + ltv_existed.sum() / cost
+        roas_pred = (y_pred.sum() + ltv_existed.sum()) / cost
+        roas_actual = (y_actual.sum() + ltv_existed.sum()) / cost
         ltv_pred = (y_pred + ltv_existed).mean()
         ltv_actual = (y_actual + ltv_existed).mean()
 
