@@ -78,6 +78,7 @@ def main():
 
     # 打印 temp_result 结构和部分内容
     logging.debug("temp_result structure and sample content:")
+    logging.debug(f"pre_cycles:{pre_cycles}")
     for split in temp_result:
         logging.debug(f"Split: {split}")
         for group in temp_result[split]:
