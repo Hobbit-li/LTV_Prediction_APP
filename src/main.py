@@ -15,6 +15,7 @@ import sys
 import warnings
 import pandas as pd
 import copy
+import json
 
 # import matplotlib.pyplot as plt
 
@@ -233,12 +234,12 @@ def main():
     all_metrics = {}
 
     # LTV metrics
-    all_metrics["ltv"] = re_dict.to_dict(orient="records")
-    all_metrics["ltv_adjusted"] = re_dict_adjust.to_dict(orient="records")
+    all_metrics["ltv"] = re_dict
+    all_metrics["ltv_adjusted"] = re_dict_adjust
 
     # ROAS metrics
-    all_metrics["roas"] = roas_results.to_dict(orient="records")
-    all_metrics["roas_adjusted"] = roas_results_adjust.to_dict(orient="records")
+    all_metrics["roas"] = roas_results
+    all_metrics["roas_adjusted"] = roas_results_adjust
 
     # save as a json file
     json_path = output_dir / "metrics_all.json"
