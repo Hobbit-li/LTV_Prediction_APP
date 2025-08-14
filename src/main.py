@@ -191,11 +191,11 @@ def main():
         df_pred.to_csv(csv_path, index=False, encoding="utf-8-sig")
         logging.info(f"Saved predictions CSV: {csv_path}")
 
-    excel_path = output_dir / "predictions_all.xlsx"
-    with pd.ExcelWriter(excel_path) as writer:
-        for i, df_pred in preds_results.items():
-            df_pred.to_excel(writer, sheet_name=f"cycle_{i}", index=False)
-    logging.info(f"Saved all predictions Excel: {excel_path}")
+    # excel_path = output_dir / "predictions_all.xlsx"
+    # with pd.ExcelWriter(excel_path) as writer:
+    #     for i, df_pred in preds_results.items():
+    #         df_pred.to_excel(writer, sheet_name=f"cycle_{i}", index=False)
+    # logging.info(f"Saved all predictions Excel: {excel_path}")
 
     # ==============================
     # Step 8: Save plots
