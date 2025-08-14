@@ -1,4 +1,4 @@
-name: Code Format & Lint Check
+name: Code Format & Lint Check with Debug
 
 on:
   push:
@@ -7,13 +7,17 @@ on:
   pull_request:
     paths:
       - 'src/main.py'
-      
+
 permissions:
   contents: write
 
 jobs:
   lint:
     runs-on: ubuntu-latest
+    env:
+      ACTIONS_RUNNER_DEBUG: true   # 开启 runner debug
+      ACTIONS_STEP_DEBUG: true     # 开启 step debug
+      MY_DEBUG_VAR: "test_value"   # 可用于脚本调试
 
     steps:
       - name: Checkout repository
@@ -41,3 +45,21 @@ jobs:
       - name: Run Pylint (code quality)
         run: |
           pylint src/ --disable=C0116,R0913,R0914 || true
+
+      # ========================
+      # Debug Python execution
+      # ========================
+      - name: Run Python script with debug
+        run: |
+          set -x  # 打印每条 shell 命令
+          mkdir -p logs
+          echo "::group::Running src/main.py"  # 折叠日志开始
+          python src/main.py > logs/output.log 2>&1
+          echo "::endgroup::"                  # 折叠日志结束
+
+      - name: Upload debug logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: debug-logs
+          path: logs/output.log
+
