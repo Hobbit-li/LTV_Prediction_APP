@@ -47,5 +47,6 @@ def show_roas_ltv(preds_results, cost, existed_tag, cycles=10):
             y_pred = y_pred + preds_results[i + 1]["pred"]
             y_actual = y_actual + preds_results[i + 1]["actual"]
         except (IndexError, KeyError):
-            raise IndexError(f"index i={i+1} not exists in preds_results.")
+            # raise IndexError(f"index i={i+1} not exists in preds_results.")
+            break
     return result
