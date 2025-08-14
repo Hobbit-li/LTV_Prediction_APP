@@ -133,14 +133,14 @@ def main():
 
     for i in range(pre_cycles):
         logging.debug(f"Prediction cycle {i}")
-        result_test_copy = temp_result_test
-        result_copy = temp_result
+        result_test_copy = copy.deepcopy(temp_result_test)
+        result_copy = copy.deepcopy(temp_result)
         for group in ["all", "nonpayer", "payer"]:
             x, y, *rest = result_test_copy["valid"][group]
             x1, y1, *rest1 = result_copy["valid"][group]
             try:
-                y = y.iloc[:, i]
-                y1 = y1.iloc[:, i]
+                y = y.iloc[:, i].fillna(0)
+                y1 = y1.iloc[:, i].fillna(0)
             except AttributeError:
                 y = [row[0] for row in y]
                 y1 = [row[0] for row in y1]
