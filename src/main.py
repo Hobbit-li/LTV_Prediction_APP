@@ -14,6 +14,7 @@ import logging
 import sys
 import warnings
 import pandas as pd
+import copy
 
 # Local application/library specific imports
 from config_loader import load_config
