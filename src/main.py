@@ -106,7 +106,7 @@ def main():
             for group in result_copy[split]:
                 x, y, *rest = result_copy[split][group]
                 try:
-                    y = y.iloc[:, i]  # if dataframe
+                    y = y.iloc[:, i].fillna(0)  # if dataframe
                 except AttributeError:
                     y = [row[0] for row in y]  # if list
                 result_copy[split][group] = (x, y, *rest) if rest else (x, y)
