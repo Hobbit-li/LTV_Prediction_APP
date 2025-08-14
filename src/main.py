@@ -34,8 +34,8 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(message)s",
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler(logs_path / "main_debug.log", mode="w")
-    ]
+        logging.FileHandler(logs_path / "main_debug.log", mode="w"),
+    ],
 )
 
 
@@ -52,7 +52,9 @@ def main():
     # Step 2: Load reference data
     # ==============================
     logging.info("Step 2: Load reference data")
-    path_ref = Path(__file__).parent.parent / "data" / "20250812_100327_09062_tej97.csv.gz"
+    path_ref = (
+        Path(__file__).parent.parent / "data" / "20250812_100327_09062_tej97.csv.gz"
+    )
     df = pd.read_csv(path_ref, compression="gzip")
     df.dropna(axis=1, how="all", inplace=True)
 
@@ -94,7 +96,9 @@ def main():
     # Step 5: Prepare test data
     # ==============================
     logging.info("Step 5: Preparing test data")
-    path_pre = Path(__file__).parent.parent / "data" / "20250812_100210_09037_tej97.csv.gz"
+    path_pre = (
+        Path(__file__).parent.parent / "data" / "20250812_100210_09037_tej97.csv.gz"
+    )
     test_df = pd.read_csv(path_pre, compression="gzip")
     test_df.dropna(axis=1, how="all", inplace=True)
     temp_result_test, _ = data_preprocess(test_df, config, ref_month, train_if=False)
@@ -183,24 +187,24 @@ def main():
     # Step 9: Save LTV / ROAS metrics
     # ==============================
     logging.info("Step 9: Saving LTV and ROAS metrics")
-    
+
     # Evaluate LTV
     re_dict = evaluate_ltv(preds_results, pre_cycles)
     re_dict_adjust = evaluate_ltv(adjust_preds_results, pre_cycles)
-    
+
     # 保存 LTV metrics
-    for name, metrics_dict in zip(
-        ["ltv", "ltv_adjusted"], [re_dict, re_dict_adjust]
-    ):
+    for name, metrics_dict in zip(["ltv", "ltv_adjusted"], [re_dict, re_dict_adjust]):
         for key, df_metric in metrics_dict.items():
             csv_path = output_dir / f"{name}_{key}.csv"
             df_metric.to_csv(csv_path, index=False, encoding="utf-8-sig")
             logging.info(f"Saved {name} metric CSV: {csv_path}")
-    
+
     # Show ROAS LTV
     roas_results = show_roas_ltv(preds_results, cost, config["payer_tag"], pre_cycles)
-    roas_results_adjust = show_roas_ltv(adjust_preds_results, cost, config["payer_tag"], pre_cycles)
-    
+    roas_results_adjust = show_roas_ltv(
+        adjust_preds_results, cost, config["payer_tag"], pre_cycles
+    )
+
     # 保存 ROAS metrics
     for name, df_metric in zip(
         ["roas", "roas_adjusted"], [roas_results, roas_results_adjust]
@@ -208,22 +212,22 @@ def main():
         csv_path = output_dir / f"{name}.csv"
         df_metric.to_csv(csv_path, index=False, encoding="utf-8-sig")
         logging.info(f"Saved {name} CSV: {csv_path}")
-    
+
     # ==============================
     # Step 10: Save residual plots
     # ==============================
     logging.info("Step 10: Saving residual plots")
     residual_dir = output_dir / "residual_plots"
     residual_dir.mkdir(exist_ok=True)
-    
+
     figs_res1 = residual_plot(preds_results, pre_cycles)
     figs_res2 = residual_plot(adjust_preds_results, pre_cycles)
-    
+
     for i, fig in enumerate(figs_res1):
         png_path = residual_dir / f"residual_plot_cycle_{i}.png"
         fig.savefig(png_path, dpi=150)
         logging.info(f"Saved residual plot PNG: {png_path}")
-    
+
     for i, fig in enumerate(figs_res2):
         png_path = residual_dir / f"residual_plot_adjusted_cycle_{i}.png"
         fig.savefig(png_path, dpi=150)
