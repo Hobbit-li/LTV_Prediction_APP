@@ -76,6 +76,22 @@ def main():
     temp_result, pre_cycles = data_preprocess(df, config, ref_month)
     logging.info(f"Preprocessing done, pre_cycles={pre_cycles}")
 
+    # 打印 temp_result 结构和部分内容
+    logging.debug("temp_result structure and sample content:")
+    for split in temp_result:
+        logging.debug(f"Split: {split}")
+        for group in temp_result[split]:
+            x, y, *rest = temp_result[split][group]
+            y_type = type(y)
+            logging.debug(f"  Group: {group}, y type: {y_type}")
+            # 打印 y 的前 5 个元素，避免日志过长
+            if isinstance(y, (pd.DataFrame, pd.Series)):
+                logging.debug(f"    y head:\n{y.head()}")
+            elif isinstance(y, list):
+                logging.debug(f"    y sample: {y[:5]}")
+            else:
+                logging.debug(f"    y content (type {y_type}): {str(y)[:100]}")
+
     # ==============================
     # Step 4: Training models
     # ==============================
