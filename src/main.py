@@ -226,7 +226,7 @@ def main():
     re_dict_adjust = evaluate_ltv(adjust_preds_results, pre_cycles)
 
     # 保存 LTV metrics
-    for name, df_metrics in zip(["ltv", "ltv_adjusted"], [re_dict, re_dict_adjust]):
+    for name, df_metric in zip(["ltv", "ltv_adjusted"], [re_dict, re_dict_adjust]):
         json_path = output_dir / f"{name}.json"
         df_metric.to_json(json_path, orient="records", force_ascii=False, indent=2)
         logging.info(f"Saved {name} metric JSON: {json_path}")
