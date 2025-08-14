@@ -24,9 +24,10 @@ def create_output_dir(base_dir="outputs"):
     Returns:
         str: Path to the created output directory (format: base_dir/run_YYYYMMDD_HHMMSS)
     """
+    base_dir = Path(base_dir)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_dir = os.path.join(base_dir, f"run_{timestamp}")
-    os.makedirs(output_dir, exist_ok=True)
+    output_dir = base_dir / f"run_{timestamp}"
+    output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir
 
 
@@ -39,8 +40,9 @@ def save_predictions(preds_results, output_dir):
         where keys are day numbers (e.g., {1: df_day1, 2: df_day2})
         output_dir (str): Path to the directory where prediction files will be saved
     """
+    output_dir = Path(output_dir)
     for day, df in preds_results.items():
-        df.to_csv(os.path.join(output_dir, f"preds_day{day}.csv"), index=False)
+        df.to_csv(output_dir / f"preds_day{day}.csv", index=False)
 
 
 def save_metrics(metrics_dict, output_dir):
@@ -56,8 +58,9 @@ def save_metrics(metrics_dict, output_dir):
     #     json.dump(metrics_dict, f, indent=2)
 
     # optional csv
+    output_dir = Path(output_dir)
     pd.DataFrame.from_dict(metrics_dict, orient="index").to_csv(
-        os.path.join(output_dir, "metrics.csv")
+        output_dir / "metrics.csv"
     )
 
 
@@ -69,4 +72,5 @@ def save_model(model, output_dir, name="model.pkl"):
         model: Trained model object
         output_dir (str): Output file path
     """
-    joblib.dump(model, os.path.join(output_dir, name))
+    output_dir = Path(output_dir)
+    joblib.dump(model, output_dir / name)
