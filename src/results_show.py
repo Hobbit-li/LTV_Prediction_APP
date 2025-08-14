@@ -5,7 +5,6 @@ Contains functions for displaying and analyzing model results
 Including ROAS and LTV (Aggregated indicators)
 """
 
-
 def show_roas_ltv(preds_results, cost, existed_tag, cycles=10):
     """
     Evaluate predicted vs. actual ROAS and LTV values
