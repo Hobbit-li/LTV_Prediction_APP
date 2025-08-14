@@ -8,6 +8,7 @@ Orchestrates the full model pipeline:
 4. Result evaluation
 """
 
+import io
 from pathlib import Path
 import logging
 import sys
@@ -58,11 +59,12 @@ def main():
     df = pd.read_csv(path_ref, compression="gzip")
     df.dropna(axis=1, how="all", inplace=True)
 
-    buffer = []
-    df.info(buf=buffer.append)
-    logging.info("DataFrame Info:\n" + "\n".join(buffer))
+    buffer = io.StringIO()
+    df.info(buf=buffer)
+    info_str = buffer.getvalue()
+    logging.info("DataFrame Info:\n%s", info_str)
     logging.info("DataFrame Describe:\n%s", df.describe().to_string())
-    logging.debug(f"DataFrame head:\n{df.head()}")
+    logging.debug("DataFrame head:\n%s", df.head())
 
     ref_month = "m5"
     cost = 1234992
