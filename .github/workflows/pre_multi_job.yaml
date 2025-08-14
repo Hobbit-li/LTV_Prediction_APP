@@ -85,7 +85,7 @@ jobs:
           set -x
           mkdir -p logs
           echo "::group::Running src/main.py"
-          python src/main.py > logs/main_run.log 2>&1
+          python src/main.py 2>&1 | tee logs/main_run.log
           echo "::endgroup::"
 
       - name: Upload logs
