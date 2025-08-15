@@ -184,13 +184,14 @@ def main():
     # Step 7: Save predictions
     # ==============================
     logging.info("Step 7: Saving predictions")
-    output_dir = create_output_dir()
-    output_dir.mkdir(exist_ok=True, parents=True)
+    logging.info("Step 7 is not necessary, can use it to debug the model")
+    # output_dir = create_output_dir()
+    # output_dir.mkdir(exist_ok=True, parents=True)
 
-    for i, df_pred in preds_results.items():
-        csv_path = output_dir / f"predictions_cycle_{i}.csv"
-        df_pred.to_csv(csv_path, index=False, encoding="utf-8-sig")
-        logging.info(f"Saved predictions CSV: {csv_path}")
+    # for i, df_pred in preds_results.items():
+    #     csv_path = output_dir / f"predictions_cycle_{i}.csv"
+    #     df_pred.to_csv(csv_path, index=False, encoding="utf-8-sig")
+    #     logging.info(f"Saved predictions CSV: {csv_path}")
 
     # excel_path = output_dir / "predictions_all.xlsx"
     # with pd.ExcelWriter(excel_path) as writer:
