@@ -185,8 +185,8 @@ def main():
     # ==============================
     logging.info("Step 7: Saving predictions")
     logging.info("Step 7 is not necessary, can use it to debug the model")
-    # output_dir = create_output_dir()
-    # output_dir.mkdir(exist_ok=True, parents=True)
+    output_dir = create_output_dir()
+    output_dir.mkdir(exist_ok=True, parents=True)
 
     # for i, df_pred in preds_results.items():
     #     csv_path = output_dir / f"predictions_cycle_{i}.csv"
