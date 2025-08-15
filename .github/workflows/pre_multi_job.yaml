@@ -11,12 +11,12 @@ on:
         description: 'Enable debug mode (true/false)'
         required: false
         default: 'true'
-  push:
-    paths:
-      - 'src/**'
-  pull_request:
-    paths:
-      - 'src/**'
+  # push:
+  #   paths:
+  #     - 'src/**'
+  # pull_request:
+  #   paths:
+  #     - 'src/**'
 
 permissions:
   contents: write
