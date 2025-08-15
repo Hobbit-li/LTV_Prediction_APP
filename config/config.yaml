@@ -419,6 +419,12 @@ params_clf:
   learning_rate: 0.05
   scale_pos_weight: 90
   num_leaves: 63
+  max_depth: 6
+  min_child_samples: 3
+  min_split_gain: 0
+  scale_pos_weight: 200  
+  num_iterations: 5000
+  early_stopping_rounds: 50
   verbose: -1
 
 # regression params
