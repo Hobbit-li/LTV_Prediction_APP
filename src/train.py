@@ -295,7 +295,7 @@ def train_reg(train_data, valid_data, config: dict, value_weighting=True):
             lgb.early_stopping(stopping_rounds=50),
             lgb.log_evaluation(period=500),
             adaptive_alpha_callback,
-            grad_monitor,
+            make_grad_monitor,
         ],
     )  # Equivalent to verbose_eval=100
 
