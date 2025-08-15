@@ -108,21 +108,25 @@ def combined_objective(y_pred, y_true, alpha=0.2, scale=1.0):
         - alpha: weight for total sum difference component (range: 0–1)
     """
     try:
+        w = y_true.get_weight()
         y_true = y_true.get_label()
     except AttributeError:
+        w = np.ones_like(y_true)
         y_true = np.array(y_true)
     n = len(y_true)
     # 1. Total sum difference component-mean
     # avoid the gradient explode
-    mean_diff = np.mean(y_pred) - np.mean(y_true)
-    sum_grad = np.full_like(y_pred, 2 * alpha * mean_diff)
-    sum_hess = np.full_like(y_pred, 2 * alpha / (n**2))
+    weighted_sum_pred = np.sum(w * y_pred)
+    weighted_sum_true = np.sum(w * y_true)
+    weighted_mean_diff = (weighted_sum_pred - weighted_sum_true) / np.sum(w)
+    
+    sum_grad = np.full_like(y_pred, 2 * alpha * weighted_mean_diff / np.sum(w))
+    sum_hess = np.full_like(y_pred, 2 * alpha / (np.sum(w) ** 2))
 
     # 2. Individual prediction error (MSE)
     residual = y_pred - y_true
-    mse_grad = 2 * (1 - alpha) * residual / n
-    mse_hess = np.full_like(y_pred, 2 * (1 - alpha) / n)
-
+    mse_grad = 2 * (1 - alpha) * residual /  np.sum(w)
+    mse_hess = np.full_like(y_pred, 2 * (1 - alpha) / np.sum(w))
     # Combine and reduce gradients
     grad = scale * (sum_grad + mse_grad)
     hess = scale * (sum_hess + mse_hess)
@@ -282,6 +286,7 @@ def train_reg(train_data, valid_data, config: dict, value_weighting=True):
     adaptive_objective, adaptive_alpha_callback = make_adaptive_objective(
         alpha_start=0.2, alpha_end=0.6, scale=0.1  # 上限不要太高，防止总和项压制 MSE
     )
+    grad_monitor = make_grad_monitor(adaptive_objective, num_rounds=10)  # 记得传 fobj
 
     params_reg["objective"] = None
     params_reg["metric"] = "None"
@@ -295,7 +300,7 @@ def train_reg(train_data, valid_data, config: dict, value_weighting=True):
             lgb.early_stopping(stopping_rounds=50),
             lgb.log_evaluation(period=500),
             adaptive_alpha_callback,
-            make_grad_monitor,
+            grad_monitor,
         ],
     )  # Equivalent to verbose_eval=100
 
