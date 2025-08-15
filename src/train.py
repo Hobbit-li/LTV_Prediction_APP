@@ -145,7 +145,7 @@ def make_adaptive_objective(alpha_start=0.2, alpha_end=0.8, scale=1.0):
             y_true = y_true.get_label()
         except AttributeError:
             y_true = np.array(y_true)
-        return combined_objective(y_pred, y_true, alpha_container["alpha"], scale = scale)
+        return combined_objective(y_pred, y_true, alpha_container["alpha"], scale=scale)
 
     # Callback to update alpha per iteration
     def callback(env):
@@ -157,11 +157,13 @@ def make_adaptive_objective(alpha_start=0.2, alpha_end=0.8, scale=1.0):
 
     return fobj, callback
 
+
 def make_grad_monitor(fobj, num_rounds=10):
     """
     创建一个回调，在前 num_rounds 轮打印梯度和 Hessian 范围
     fobj: 你的自定义目标函数
     """
+
     def _callback(env):
         if env.iteration < num_rounds:
             # 取训练集的第一个 Dataset
@@ -170,11 +172,15 @@ def make_grad_monitor(fobj, num_rounds=10):
             y_pred = env.model.predict(train_dataset.get_data())
 
             grad, hess = fobj(y_pred, y_true)
-            print(f"[Iter {env.iteration}] "
-                  f"Grad: min={grad.min():.6f}, max={grad.max():.6f}, mean={grad.mean():.6f} | "
-                  f"Hess: min={hess.min():.6f}, max={hess.max():.6f}, mean={hess.mean():.6f}")
+            print(
+                f"[Iter {env.iteration}] "
+                f"Grad: min={grad.min():.6f}, max={grad.max():.6f}, mean={grad.mean():.6f} | "
+                f"Hess: min={hess.min():.6f}, max={hess.max():.6f}, mean={hess.mean():.6f}"
+            )
+
     _callback.order = 20  # 在日志打印之后执行
     return _callback
+
 
 # def calibrate_predictions(model, x_train, y_train, x_test):
 #     """
@@ -273,10 +279,10 @@ def train_reg(train_data, valid_data, config: dict, value_weighting=True):
     val_data = lgb.Dataset(
         x_valid, label=y_valid_log, categorical_feature=cat_features, reference=trn_data
     )
-    adaptive_objective, adaptive_alpha_callback = make_adaptive_objective(alpha_start=0.2,
-            alpha_end=0.6,  # 上限不要太高，防止总和项压制 MSE
-            scale=0.1    )
-    
+    adaptive_objective, adaptive_alpha_callback = make_adaptive_objective(
+        alpha_start=0.2, alpha_end=0.6, scale=0.1  # 上限不要太高，防止总和项压制 MSE
+    )
+
     params_reg["objective"] = None
     params_reg["metric"] = "None"
     reg = lgb.train(
@@ -289,7 +295,7 @@ def train_reg(train_data, valid_data, config: dict, value_weighting=True):
             lgb.early_stopping(stopping_rounds=50),
             lgb.log_evaluation(period=500),
             adaptive_alpha_callback,
-            grad_monitor, 
+            grad_monitor,
         ],
     )  # Equivalent to verbose_eval=100
 
