@@ -101,89 +101,89 @@ def r2_eval(preds, train_data):
     return "r2", r2_score(labels, preds), True
 
 
-def combined_objective(y_pred, y_true, alpha=0.2, scale=1.0):
-    """
-    - Combined loss function:
-        - balances total sum difference and individual prediction quality
-        - alpha: weight for total sum difference component (range: 0–1)
-    """
-    try:
-        w = y_true.get_weight()
-        y_true = y_true.get_label()
-    except AttributeError:
-        w = np.ones_like(y_true)
-        y_true = np.array(y_true)
-    n = len(y_true)
-    # 1. Total sum difference component-mean
-    # avoid the gradient explode
-    weighted_sum_pred = np.sum(w * y_pred)
-    weighted_sum_true = np.sum(w * y_true)
-    weighted_mean_diff = (weighted_sum_pred - weighted_sum_true) / np.sum(w)
+# def combined_objective(y_pred, y_true, alpha=0.2, scale=1.0):
+#     """
+#     - Combined loss function:
+#         - balances total sum difference and individual prediction quality
+#         - alpha: weight for total sum difference component (range: 0–1)
+#     """
+#     try:
+#         w = y_true.get_weight()
+#         y_true = y_true.get_label()
+#     except AttributeError:
+#         w = np.ones_like(y_true)
+#         y_true = np.array(y_true)
+#     n = len(y_true)
+#     # 1. Total sum difference component-mean
+#     # avoid the gradient explode
+#     weighted_sum_pred = np.sum(w * y_pred)
+#     weighted_sum_true = np.sum(w * y_true)
+#     weighted_mean_diff = (weighted_sum_pred - weighted_sum_true) / np.sum(w)
 
-    sum_grad = np.full_like(y_pred, 2 * alpha * weighted_mean_diff / np.sum(w))
-    sum_hess = np.full_like(y_pred, 2 * alpha / (np.sum(w) ** 2))
+#     sum_grad = np.full_like(y_pred, 2 * alpha * weighted_mean_diff / np.sum(w))
+#     sum_hess = np.full_like(y_pred, 2 * alpha / (np.sum(w) ** 2))
 
-    # 2. Individual prediction error (MSE)
-    residual = y_pred - y_true
-    mse_grad = 2 * (1 - alpha) * residual / np.sum(w)
-    mse_hess = np.full_like(y_pred, 2 * (1 - alpha) / np.sum(w))
-    # Combine and reduce gradients
-    grad = scale * (sum_grad + mse_grad)
-    hess = scale * (sum_hess + mse_hess)
+#     # 2. Individual prediction error (MSE)
+#     residual = y_pred - y_true
+#     mse_grad = 2 * (1 - alpha) * residual / np.sum(w)
+#     mse_hess = np.full_like(y_pred, 2 * (1 - alpha) / np.sum(w))
+#     # Combine and reduce gradients
+#     grad = scale * (sum_grad + mse_grad)
+#     hess = scale * (sum_hess + mse_hess)
 
-    return grad, hess
-
-
-# Dynamically adjust weight during training
-def make_adaptive_objective(alpha_start=0.2, alpha_end=0.8, scale=1.0):
-    """
-    Returns:
-        fobj: custom objective function
-        callback: LightGBM callback to update alpha each iteration
-    """
-    alpha_container = {"alpha": alpha_start}  # 初始 alpha
-
-    # Custom objective reads alpha from the container
-    def fobj(y_pred, y_true):
-        try:
-            y_true = y_true.get_label()
-        except AttributeError:
-            y_true = np.array(y_true)
-        return combined_objective(y_pred, y_true, alpha_container["alpha"], scale=scale)
-
-    # Callback to update alpha per iteration
-    def callback(env):
-        progress = env.iteration / max(env.end_iteration, 1)
-        alpha = min(alpha_end, alpha_start + (alpha_end - alpha_start) * progress)
-        alpha_container["alpha"] = alpha
-
-    callback.order = 10  # 在其他 callback 之前或之后调用，可按需调整
-
-    return fobj, callback
+#     return grad, hess
 
 
-def make_grad_monitor(fobj, num_rounds=10):
-    """
-    创建一个回调，在前 num_rounds 轮打印梯度和 Hessian 范围
-    fobj: 你的自定义目标函数
-    """
+# # Dynamically adjust weight during training
+# def make_adaptive_objective(alpha_start=0.2, alpha_end=0.8, scale=1.0):
+#     """
+#     Returns:
+#         fobj: custom objective function
+#         callback: LightGBM callback to update alpha each iteration
+#     """
+#     alpha_container = {"alpha": alpha_start}  # 初始 alpha
 
-    def _callback(env):
-        if env.iteration < num_rounds:
-            # 取训练集的第一个 Dataset
-            train_dataset = env.model.train_set
-            y_true = train_dataset.get_label()
-            y_pred = env.model.predict(train_dataset.get_data())
+#     # Custom objective reads alpha from the container
+#     def fobj(y_pred, y_true):
+#         try:
+#             y_true = y_true.get_label()
+#         except AttributeError:
+#             y_true = np.array(y_true)
+#         return combined_objective(y_pred, y_true, alpha_container["alpha"], scale=scale)
 
-            grad, hess = fobj(y_pred, y_true)
-            print(
-                f"[Iter {env.iteration}] "
-                f"Grad: min={grad.min():.6f}, max={grad.max():.6f}, mean={grad.mean():.6f} | "
-                f"Hess: min={hess.min():.6f}, max={hess.max():.6f}, mean={hess.mean():.6f}"
-            )
+#     # Callback to update alpha per iteration
+#     def callback(env):
+#         progress = env.iteration / max(env.end_iteration, 1)
+#         alpha = min(alpha_end, alpha_start + (alpha_end - alpha_start) * progress)
+#         alpha_container["alpha"] = alpha
 
-    _callback.order = 20  # 在日志打印之后执行
-    return _callback
+#     callback.order = 10  # 在其他 callback 之前或之后调用，可按需调整
+
+#     return fobj, callback
+
+
+# def make_grad_monitor(fobj, num_rounds=10):
+#     """
+#     创建一个回调，在前 num_rounds 轮打印梯度和 Hessian 范围
+#     fobj: 你的自定义目标函数
+#     """
+
+#     def _callback(env):
+#         if env.iteration < num_rounds:
+#             # 取训练集的第一个 Dataset
+#             train_dataset = env.model.train_set
+#             y_true = train_dataset.get_label()
+#             y_pred = env.model.predict(train_dataset.get_data())
+
+#             grad, hess = fobj(y_pred, y_true)
+#             print(
+#                 f"[Iter {env.iteration}] "
+#                 f"Grad: min={grad.min():.6f}, max={grad.max():.6f}, mean={grad.mean():.6f} | "
+#                 f"Hess: min={hess.min():.6f}, max={hess.max():.6f}, mean={hess.mean():.6f}"
+#             )
+
+#     _callback.order = 20  # 在日志打印之后执行
+#     return _callback
 
 
 # def calibrate_predictions(model, x_train, y_train, x_test):
@@ -288,24 +288,24 @@ def train_reg(train_data, valid_data, config: dict, value_weighting=True):
         reference=trn_data,
         free_raw_data=False,
     )
-    adaptive_objective, adaptive_alpha_callback = make_adaptive_objective(
-        alpha_start=0.2, alpha_end=0.6, scale=0.1  # 上限不要太高，防止总和项压制 MSE
-    )
-    grad_monitor = make_grad_monitor(adaptive_objective, num_rounds=10)  # 记得传 fobj
+    # adaptive_objective, adaptive_alpha_callback = make_adaptive_objective(
+    #     alpha_start=0.2, alpha_end=0.6, scale=0.1  # 上限不要太高，防止总和项压制 MSE
+    # )
+    # grad_monitor = make_grad_monitor(adaptive_objective, num_rounds=10)  # 记得传 fobj
 
-    params_reg["objective"] = None
-    params_reg["metric"] = "None"
+    # params_reg["objective"] = None
+    # params_reg["metric"] = "None"
     reg = lgb.train(
         params_reg,
         trn_data,
         valid_sets=[trn_data, val_data],
-        fobj=adaptive_objective,  # customed objective
+        # fobj=adaptive_objective,  # customed objective
         feval=r2_eval,
         callbacks=[
             lgb.early_stopping(stopping_rounds=50),
             lgb.log_evaluation(period=500),
-            adaptive_alpha_callback,
-            grad_monitor,
+            # adaptive_alpha_callback,
+            # grad_monitor,
         ],
     )  # Equivalent to verbose_eval=100
 
