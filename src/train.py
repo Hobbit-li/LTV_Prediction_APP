@@ -282,11 +282,11 @@ def train_reg(train_data, valid_data, config: dict, value_weighting=True):
         free_raw_data=False,
     )
     val_data = lgb.Dataset(
-        x_valid, 
-        label=y_valid_log, 
-        categorical_feature=cat_features, 
+        x_valid,
+        label=y_valid_log,
+        categorical_feature=cat_features,
         reference=trn_data,
-        free_raw_data=False
+        free_raw_data=False,
     )
     adaptive_objective, adaptive_alpha_callback = make_adaptive_objective(
         alpha_start=0.2, alpha_end=0.6, scale=0.1  # 上限不要太高，防止总和项压制 MSE
