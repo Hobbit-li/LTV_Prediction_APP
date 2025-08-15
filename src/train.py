@@ -119,13 +119,13 @@ def combined_objective(y_pred, y_true, alpha=0.2, scale=1.0):
     weighted_sum_pred = np.sum(w * y_pred)
     weighted_sum_true = np.sum(w * y_true)
     weighted_mean_diff = (weighted_sum_pred - weighted_sum_true) / np.sum(w)
-    
+
     sum_grad = np.full_like(y_pred, 2 * alpha * weighted_mean_diff / np.sum(w))
     sum_hess = np.full_like(y_pred, 2 * alpha / (np.sum(w) ** 2))
 
     # 2. Individual prediction error (MSE)
     residual = y_pred - y_true
-    mse_grad = 2 * (1 - alpha) * residual /  np.sum(w)
+    mse_grad = 2 * (1 - alpha) * residual / np.sum(w)
     mse_hess = np.full_like(y_pred, 2 * (1 - alpha) / np.sum(w))
     # Combine and reduce gradients
     grad = scale * (sum_grad + mse_grad)
