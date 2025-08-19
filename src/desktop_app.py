@@ -1,7 +1,7 @@
 import webview
 import threading
 from pathlib import Path
-from main_app import run_pipeline
+from app import run_pipeline
 
 
 class Api:
