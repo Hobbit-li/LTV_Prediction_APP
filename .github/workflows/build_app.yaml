@@ -24,7 +24,7 @@ jobs:
 
     - name: Build executable
       run: |
-        python -m pyinstallerp --noconsole --onefile desktop_app.py
+        python -m pyinstaller --noconsole --onefile desktop_app.py
 
     - name: Create Release
       id: create_release
