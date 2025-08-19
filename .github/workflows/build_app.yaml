@@ -2,7 +2,13 @@ name: Build Desktop App
 
 on:
   workflow_dispatch:  # Manual trigger only
-
+  push:
+    tags:
+      - "v*"
+  
+permissions:
+  contents: write 
+  
 jobs:
   build:
     runs-on: windows-latest
