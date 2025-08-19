@@ -1,32 +1,41 @@
 name: Build Desktop App
 
 on:
-  workflow_dispatch:  # manually trigger only
+  workflow_dispatch:  # Manual trigger only
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
+    # 1️⃣ Checkout repository code
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    # 2️⃣ Set up Python
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
-    - name: Install dependencies
+    # 3️⃣ Create virtual environment and install dependencies
+    - name: Set up virtual environment and install dependencies
+      shell: pwsh
       run: |
+        python -m venv venv
+        .\venv\Scripts\Activate.ps1
         python -m pip install --upgrade pip
         python -m pip install -r requirements.txt
         python -m pip install pyinstaller
 
-
+    # 4️⃣ Build executable using PyInstaller
     - name: Build executable
+      shell: pwsh
       run: |
+        .\venv\Scripts\Activate.ps1
         python -m pyinstaller --noconsole --onefile desktop_app.py
 
+    # 5️⃣ Create GitHub Release
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -38,6 +47,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    # 6️⃣ Upload exe to Release
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       with:
