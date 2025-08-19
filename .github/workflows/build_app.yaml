@@ -34,7 +34,7 @@ jobs:
       run: |
         .\venv\Scripts\activate
         pyinstaller --noconsole --onefile `
-          --add-data "config.yaml:." `
+          --add-data "config/config.yaml:config" `
           --add-data "src:src" `
           src/desktop_app.py
         
