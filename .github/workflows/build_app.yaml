@@ -18,20 +18,25 @@ jobs:
       with:
         python-version: '3.10'
 
-    # 3️⃣ Create virtual environment and install dependencies
+   # 3️⃣ Create virtual environment and install dependencies
     - name: Set up virtual environment and install dependencies
       shell: pwsh
       run: |
-        .\venv\Scripts\python.exe -m pip install --upgrade pip
-        .\venv\Scripts\python.exe -m pip install -r requirements.txt
-        .\venv\Scripts\python.exe -m pip install pyinstaller
-        .\venv\Scripts\python.exe -m pyinstaller --noconsole --onefile --add-data "config.yaml;." --add-data "assets;assets" desktop_app.py
-
+        python -m venv venv
+        .\venv\Scripts\activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
 
     # 4️⃣ Build executable with resource files
-    # - name: Build executable with resources
-    #   shell: pwsh
-    #   run: |
+    - name: Build executable with resources
+      shell: pwsh
+      run: |
+        .\venv\Scripts\activate
+        pyinstaller --noconsole --onefile `
+          --add-data "config.yaml;." `
+          --add-data "assets;assets" `
+          desktop_app.py
         
     # 5️⃣ Create Release
     - name: Create Release
