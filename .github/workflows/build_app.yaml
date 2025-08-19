@@ -8,11 +8,11 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    # 1️⃣ Checkout repository code
+    # 1️⃣ Checkout code
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # 2️⃣ Set up Python
+    # 2️⃣ Install Python
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -23,19 +23,20 @@ jobs:
       shell: pwsh
       run: |
         python -m venv venv
-        .\venv\Scripts\Activate.ps1
-        python -m pip install --upgrade pip
-        python -m pip install -r requirements.txt
-        python -m pip install pyinstaller
+        .\venv\Scripts\python.exe -m pip install --upgrade pip
+        .\venv\Scripts\python.exe -m pip install -r requirements.txt
+        .\venv\Scripts\python.exe -m pip install pyinstaller
 
-    # 4️⃣ Build executable using PyInstaller
-    - name: Build executable
+    # 4️⃣ Build executable with resource files
+    - name: Build executable with resources
       shell: pwsh
       run: |
-        .\venv\Scripts\Activate.ps1
-        python -m pyinstaller --noconsole --onefile desktop_app.py
+        .\venv\Scripts\python.exe -m pyinstaller --noconsole --onefile `
+          --add-data "config.yaml;." `
+          --add-data "assets;assets" `
+          desktop_app.py
 
-    # 5️⃣ Create GitHub Release
+    # 5️⃣ Create Release
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
