@@ -42,6 +42,7 @@ jobs:
         pyinstaller --noconsole --onefile `
           --add-data "config/config.yaml:config" `
           --add-data "src:src" `
+          --add-data "src/web_ui/gui.html:web_ui" `
           src/desktop_app.py
         
     # 5️⃣ Create Release
