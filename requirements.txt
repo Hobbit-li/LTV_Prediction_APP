@@ -9,5 +9,5 @@ matplotlib
 black
 pylint
 openpyxl>=3.1.0
-webview
-threading
+pywebview
+
