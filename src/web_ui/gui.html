@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>LTV Prediction App</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .dropzone {
+      border: 2px dashed #999;
+      padding: 30px;
+      text-align: center;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    input, button {
+      margin: 10px 0;
+      padding: 8px;
+      width: 200px;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 10px;
+      border: 1px solid #ddd;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>LTV Prediction 桌面应用</h1>
+
+  <div class="dropzone" id="train-drop">
+    拖拽 <b>训练集</b> 文件到此处
+  </div>
+  <div class="dropzone" id="test-drop">
+    拖拽 <b>测试集</b> 文件到此处
+  </div>
+
+  <label>参考月份 (ref_month):</label><br>
+  <input type="text" id="ref_month" placeholder="例如 m5"><br>
+
+  <label>成本 (cost):</label><br>
+  <input type="number" id="cost" placeholder="例如 1000000"><br>
+
+  <button onclick="runPipeline()">运行模型</button>
+
+  <h2>结果:</h2>
+  <pre id="output"></pre>
+
+  <script>
+    let trainFilePath = "";
+    let testFilePath = "";
+
+    function setupDrop(dropId, callback) {
+      let dropzone = document.getElementById(dropId);
+      dropzone.addEventListener("dragover", e => {
+        e.preventDefault();
+        dropzone.style.background = "#eee";
+      });
+      dropzone.addEventListener("dragleave", e => {
+        e.preventDefault();
+        dropzone.style.background = "";
+      });
+      dropzone.addEventListener("drop", e => {
+        e.preventDefault();
+        dropzone.style.background = "";
+        let file = e.dataTransfer.files[0];
+        if (file) {
+          dropzone.innerText = "已选择: " + file.path;
+          callback(file.path);
+        }
+      });
+    }
+
+    setupDrop("train-drop", path => { trainFilePath = path; });
+    setupDrop("test-drop", path => { testFilePath = path; });
+
+    async function runPipeline() {
+      let refMonth = document.getElementById("ref_month").value;
+      let cost = document.getElementById("cost").value;
+
+      if (!trainFilePath || !testFilePath) {
+        alert("请拖拽上传训练集和测试集文件！");
+        return;
+      }
+      if (!refMonth || !cost) {
+        alert("请输入 ref_month 和 cost！");
+        return;
+      }
+
+      document.getElementById("output").innerText = "运行中...";
+
+      try {
+        let results = await window.pywebview.api.run_model(trainFilePath, testFilePath, refMonth, cost);
+        document.getElementById("output").innerText = JSON.stringify(results, null, 2);
+      } catch (err) {
+        document.getElementById("output").innerText = "错误: " + err;
+      }
+    }
+  </script>
+</body>
+</html>
