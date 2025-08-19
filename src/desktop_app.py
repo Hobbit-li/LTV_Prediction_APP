@@ -20,8 +20,10 @@ def resource_path(relative_path):
     else:
         # Running in development
         base_path = os.path.abspath(".")
-    
-    return os.path.join(base_path, relative_path)
+     # 规范化路径，确保使用正确的路径分隔符
+    normalized_path = os.path.normpath(os.path.join(base_path, relative_path))
+    logger.info(f"资源路径: {base_path} + {relative_path} = {normalized_path}")
+    return normalized_path
 
 def validate_file_path(file_path):
     """
