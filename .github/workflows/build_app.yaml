@@ -22,20 +22,17 @@ jobs:
     - name: Set up virtual environment and install dependencies
       shell: pwsh
       run: |
-        python -m venv venv
         .\venv\Scripts\python.exe -m pip install --upgrade pip
         .\venv\Scripts\python.exe -m pip install -r requirements.txt
         .\venv\Scripts\python.exe -m pip install pyinstaller
+        .\venv\Scripts\python.exe -m pyinstaller --noconsole --onefile --add-data "config.yaml;." --add-data "assets;assets" desktop_app.py
+
 
     # 4️⃣ Build executable with resource files
-    - name: Build executable with resources
-      shell: pwsh
-      run: |
-        .\venv\Scripts\python.exe -m pyinstaller --noconsole --onefile `
-          --add-data "config.yaml;." `
-          --add-data "assets;assets" `
-          desktop_app.py
-
+    # - name: Build executable with resources
+    #   shell: pwsh
+    #   run: |
+        
     # 5️⃣ Create Release
     - name: Create Release
       id: create_release
