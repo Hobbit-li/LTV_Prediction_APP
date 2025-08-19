@@ -1,140 +1,166 @@
-import streamlit as st
-import traceback
+"""
+Main Execution Logic (GUI-adapted)
+
+Provides a function `run_pipeline` that:
+1. Loads input data from uploaded file
+2. Runs preprocessing, training, prediction
+3. Computes and saves metrics/plots
+4. Returns summary results (dict)
+"""
+
+import io
+from pathlib import Path
+import logging
+import warnings
 import pandas as pd
+import copy
+import json
+
+# Local application imports
 from config_loader import load_config
 from data_utils import data_preprocess
-from train import train_process
 from predict import predict_process
 from results_show import show_roas_ltv
+from train import train_process
+from utils_io import create_output_dir
 from visual import compare_plot, evaluate_ltv, residual_plot
-from utils_io import save_predictions, create_output_dir
 
-pd.options.mode.chained_assignment = None  # 关闭 SettingWithCopyWarning
 
-st.set_page_config(page_title="LTV模型预测工具", layout="wide")
-st.title("📊 LTV 模型预测工具")
+def run_pipeline(path_ref: str, path_pre: str, ref_month: str, cost: float):
+    """
+    Run the full pipeline for given file and parameters.
+    Returns a dict of results (ROAS, LTV, etc.).
+    """
 
-try:
-    # 加载配置参数
+    warnings.simplefilter("ignore")
+
+    # ==============================
+    # Step 1: Load configuration
+    # ==============================
     config = load_config()
-    days_list = config["days_list"]
 
-    # 1. 上传训练参考数据
-    st.header("📂 第一步：上传历史参考数据（带LTV标签）")
-    ref_file = st.file_uploader("上传CSV文件作为训练数据", type=["csv"], key="ref")
+    # ==============================
+    # Step 2: Load reference data
+    # ==============================
+    df = pd.read_csv(path_ref) if path_ref.endswith(".csv") else pd.read_excel(path_ref)
+    df.dropna(axis=1, how="all", inplace=True)
 
-    # 2. 上传需要预测的数据
-    st.header("📂 第二步：上传待预测数据")
-    pred_file = st.file_uploader("上传CSV文件作为预测数据", type=["csv"], key="pred")
+    # ==============================
+    # Step 3: Data preprocessing
+    # ==============================
+    temp_result, pre_cycles = data_preprocess(df, config, ref_month)
 
-    # 运行主逻辑按钮
-    if ref_file and pred_file and st.button("🚀 开始训练与预测"):
-        with st.spinner("数据加载与预处理中..."):
-            df_ref = pd.read_csv(ref_file).fillna(0)
-            df_pred = pd.read_csv(pred_file).fillna(0)
-            st.dataframe(df_ref.head())
-            st.dataframe(df_pred.head())
-            st.write("准备开始处理训练数据")
-            temp_result = data_preprocess(df_ref, config)
-            st.write("✅ 脚本已加载，无语法错误")
-            temp_result_pred = data_preprocess(df_pred, config, train_data=False)
-            st.write("✅ 脚本已加载，无语法错误")
+    # ==============================
+    # Step 4: Training models
+    # ==============================
+    model_results = {}
+    for i in range(pre_cycles):
+        result_copy = copy.deepcopy(temp_result)
+        for split in ["train", "valid"]:
+            for group in result_copy[split]:
+                x, y, *rest = result_copy[split][group]
+                try:
+                    y = y.iloc[:, i].fillna(0)  # if dataframe
+                except AttributeError:
+                    y = [row[0] for row in y]  # if list
+                result_copy[split][group] = (x, y, *rest) if rest else (x, y)
+        model_results[i] = train_process(result_copy, config)
 
-        with st.spinner("训练模型中..."):
-            model_results = {}
-            for day in days_list:
-                x_train_nonpayer, y_train_nonpayer = temp_result["train"][day][
-                    "nonpayer"
-                ]
-                x_train_payer, y_train_payer = temp_result["train"][day]["payer"]
-                x_valid_nonpayer, y_valid_nonpayer = temp_result["valid"][day][
-                    "nonpayer"
-                ]
-                x_valid_payer, y_valid_payer = temp_result["valid"][day]["payer"]
+    # ==============================
+    # Step 5: Predictions
+    # ==============================
+    preds_results = {}
+    adjust_preds_results = {}
 
-                model_results[day] = train_process(
-                    x_train_nonpayer,
-                    x_valid_nonpayer,
-                    x_train_payer,
-                    x_valid_payer,
-                    y_train_nonpayer,
-                    y_valid_nonpayer,
-                    y_train_payer,
-                    y_valid_payer,
-                    config,
-                )
-            st.write("✅ 训练完成")
+    for i in range(pre_cycles):
+        result_test_copy = copy.deepcopy(temp_result_test)
+        result_copy = copy.deepcopy(temp_result)
+        for group in ["all", "nonpayer", "payer"]:
+            x, y, *rest = result_test_copy["valid"][group]
+            x1, y1, *rest1 = result_copy["valid"][group]
+            try:
+                if hasattr(y, "iloc") and i < y.shape[1]:
+                    y = y.iloc[:, i].fillna(0)
+                else:
+                    y = pd.Series([0] * len(y), index=y.index)
+            except Exception:
+                y = pd.Series([0] * len(y), index=y.index)
+            try:
+                if hasattr(y1, "iloc") and i < y1.shape[1]:
+                    y1 = y1.iloc[:, i].fillna(0)
+                else:
+                    y1 = pd.Series([0] * len(y1), index=y1.index)
+            except Exception:
+                y1 = pd.Series([0] * len(y1), index=y1.index)
 
-        # with st.spinner("使用验证集重新训练中..."):
-        #     model_test = {}
-        #     params_clf = config["params_clf"]
-        #     params_reg = config["params_reg"]
+            result_test_copy["valid"][group] = (x, y, *rest) if rest else (x, y)
+            result_copy["valid"][group] = (x1, y1, *rest1) if rest else (x1, y1)
 
-        #     for day, res in model_results.items():
-        #         params_clf["num_iterations"] = res["model_clf"].best_iteration
-        #         params_reg["num_iterations"] = res["model_reg"].best_iteration
+        preds_results[i] = predict_process(
+            result_copy,
+            model_results[i]["model_clf"],
+            model_results[i]["model_reg"],
+            config,
+        )
 
-        #         x_clf, y_clf = temp_result["valid"][day]["nonpayer"]
-        #         x_reg, y_reg = temp_result["valid"][day]["payer"]
+        preds_train = predict_process(
+            result_copy,
+            model_results[i]["model_clf"],
+            model_results[i]["model_reg"],
+            config,
+        )
+        adjustment = (
+            preds_train["pred"].values.sum() - preds_train["actual"].values.sum()
+        ) / len(preds_train)
+        adjust_preds_results[i] = preds_results[i].copy()
+        adjust_preds_results[i]["pred"] = adjust_preds_results[i]["pred"] - adjustment
 
-        #         model_test[day] = train_process(
-        #             x_clf, x_clf, x_reg, x_reg, y_clf, y_clf, y_reg, y_reg, config
-        #         )
-        #         st.write("✅ 脚本已加载，无语法错误")
-    if st.button("开始预测"):
-        model_test = model_results
-        with st.spinner("生成预测中..."):
-            preds_results = {}
-            for day in days_list:
-                _, _, id_test = temp_result_pred["train"][day]["all"]
-                x_test_nonpayer, y_test_nonpayer = temp_result_pred["train"][day][
-                    "nonpayer"
-                ]
-                x_test_payer, y_test_payer = temp_result_pred["train"][day]["payer"]
+    # ==============================
+    # Step 6: Save metrics and plots
+    # ==============================
+    output_dir = create_output_dir()
+    plots_dir = output_dir / "plots"
+    plots_dir.mkdir(exist_ok=True)
+    residual_dir = output_dir / "residual_plots"
+    residual_dir.mkdir(exist_ok=True)
 
-                preds_results[day] = predict_process(
-                    x_test_nonpayer,
-                    x_test_payer,
-                    y_test_nonpayer,
-                    y_test_payer,
-                    id_test,
-                    model_test[day]["model_clf"],
-                    model_test[day]["model_reg"],
-                    config,
-                )
+    # Save plots
+    figs_com1 = compare_plot(preds_results, pre_cycles)
+    for i, fig in enumerate(figs_com1):
+        fig.savefig(plots_dir / f"compare_plot_cycle_{i}.png", dpi=150)
+    figs_com2 = compare_plot(adjust_preds_results, pre_cycles)
+    for i, fig in enumerate(figs_com2):
+        fig.savefig(plots_dir / f"adjusted_compare_plot_cycle_{i}.png", dpi=150)
 
-        st.success("✅ 模型预测完成！")
+    figs_res1 = residual_plot(preds_results, pre_cycles)
+    for i, fig in enumerate(figs_res1):
+        fig.savefig(residual_dir / f"residual_plot_cycle_{i}.png", dpi=80)
+    figs_res2 = residual_plot(adjust_preds_results, pre_cycles)
+    for i, fig in enumerate(figs_res2):
+        fig.savefig(residual_dir / f"residual_plot_adjusted_cycle_{i}.png", dpi=80)
 
-        # 保存预测结果
-        output_dir = create_output_dir()
-        output_path = f"{output_dir}/ltv_predictions.csv"
-        save_predictions(preds_results, output_dir)
+    # Save metrics
+    re_dict = evaluate_ltv(preds_results, pre_cycles)
+    re_dict_adjust = evaluate_ltv(adjust_preds_results, pre_cycles)
 
-        # with open(output_path, "rb") as f:
-        #     st.download_button(
-        #         "📥 点击下载预测结果", f, file_name="ltv_predictions.csv"
-        #     )
+    roas_results = show_roas_ltv(preds_results, cost, config["payer_tag"], pre_cycles)
+    roas_results_adjust = show_roas_ltv(adjust_preds_results, cost, config["payer_tag"], pre_cycles)
 
-        # 展示图表
-    if st.button("展示结果"):
-        st.header("📈 模型可视化评估")
+    all_metrics = {
+        "ltv": re_dict,
+        "ltv_adjusted": re_dict_adjust,
+        "roas": roas_results,
+        "roas_adjusted": roas_results_adjust,
+    }
 
-        st.subheader("📊 预测值 vs 实际值")
-        fig1 = compare_plot(preds_results, config)
-        st.pyplot(fig1)
+    json_path = output_dir / "metrics_all.json"
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(all_metrics, f, ensure_ascii=False, indent=2)
 
-        st.subheader("📉 残差分布图")
-        fig2 = residual_plot(preds_results, config)
-        st.pyplot(fig2)
-
-        st.subheader("💡 LTV评估指标")
-
-        # 计算并展示LTV评估指标
-        ltv_metrics = evaluate_ltv(preds_results, config)
-        roas_ltv = show_roas_ltv(preds_results, config)
-        st.table(ltv_metrics)
-        st.table(roas_ltv)
-
-except Exception as e:
-    st.error("❌ 发生错误，下面是详细信息：")
-    st.code(traceback.format_exc())
+    # ==============================
+    # Return summary
+    # ==============================
+    return {
+        "output_dir": str(output_dir),
+        "metrics": all_metrics,
+    }
