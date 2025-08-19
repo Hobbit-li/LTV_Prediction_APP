@@ -35,8 +35,8 @@ jobs:
         .\venv\Scripts\activate
         pyinstaller --noconsole --onefile `
           --add-data "config.yaml;." `
-          --add-data "assets;assets" `
-          desktop_app.py
+          --add-data "src/main.py" `
+          src/desktop_app.py
         
     # 5️⃣ Create Release
     - name: Create Release
