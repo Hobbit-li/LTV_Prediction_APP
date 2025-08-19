@@ -1,7 +1,7 @@
 name: Build Desktop App
 
 on:
-  workflow_dispatch:  # 仅支持手动触发
+  workflow_dispatch:  # manually trigger only
 
 jobs:
   build:
