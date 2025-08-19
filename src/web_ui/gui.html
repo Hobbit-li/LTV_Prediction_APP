@@ -11,6 +11,14 @@
       text-align: center;
       color: #666;
       margin-bottom: 20px;
+      transition: background-color 0.3s;
+    }
+    .dropzone.highlight {
+      background-color: #eee;
+    }
+    .dropzone.has-file {
+      border-color: #4CAF50;
+      color: #4CAF50;
     }
     input, button {
       margin: 10px 0;
@@ -23,6 +31,12 @@
       border: 1px solid #ddd;
       overflow-x: auto;
     }
+    #file-paths {
+      margin: 20px 0;
+      padding: 10px;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+    }
   </style>
 </head>
 <body>
@@ -33,6 +47,11 @@
   </div>
   <div class="dropzone" id="test-drop">
     拖拽 <b>测试集</b> 文件到此处
+  </div>
+
+  <div id="file-paths">
+    <div>训练文件: <span id="train-file-path">未选择</span></div>
+    <div>测试文件: <span id="test-file-path">未选择</span></div>
   </div>
 
   <label>参考月份 (ref_month):</label><br>
@@ -50,29 +69,49 @@
     let trainFilePath = "";
     let testFilePath = "";
 
-    function setupDrop(dropId, callback) {
+    function setupDrop(dropId, type) {
       let dropzone = document.getElementById(dropId);
+      let pathElement = document.getElementById(type + "-file-path");
+      
       dropzone.addEventListener("dragover", e => {
         e.preventDefault();
-        dropzone.style.background = "#eee";
+        dropzone.classList.add("highlight");
       });
+      
       dropzone.addEventListener("dragleave", e => {
         e.preventDefault();
-        dropzone.style.background = "";
+        dropzone.classList.remove("highlight");
       });
+      
       dropzone.addEventListener("drop", e => {
         e.preventDefault();
-        dropzone.style.background = "";
-        let file = e.dataTransfer.files[0];
-        if (file) {
-          dropzone.innerText = "已选择: " + file.path;
-          callback(file.path);
+        dropzone.classList.remove("highlight");
+        
+        let files = e.dataTransfer.files;
+        if (files.length > 0) {
+          // 获取文件路径 - 尝试多种方式
+          let filePath = files[0].path || files[0].name;
+          
+          // 更新界面显示
+          dropzone.innerHTML = "已选择: " + files[0].name;
+          dropzone.classList.add("has-file");
+          pathElement.textContent = filePath;
+          
+          // 存储文件路径
+          if (type === "train") {
+            trainFilePath = filePath;
+          } else {
+            testFilePath = filePath;
+          }
+          
+          console.log(type + "文件路径:", filePath);
         }
       });
     }
 
-    setupDrop("train-drop", path => { trainFilePath = path; });
-    setupDrop("test-drop", path => { testFilePath = path; });
+    // 初始化拖拽区域
+    setupDrop("train-drop", "train");
+    setupDrop("test-drop", "test");
 
     async function runPipeline() {
       let refMonth = document.getElementById("ref_month").value;
@@ -90,12 +129,45 @@
       document.getElementById("output").innerText = "运行中...";
 
       try {
+        // 检查API是否可用
+        if (!window.pywebview || !window.pywebview.api) {
+          throw new Error("无法连接到Python后端，请确保应用正确运行");
+        }
+        
         let results = await window.pywebview.api.run_model(trainFilePath, testFilePath, refMonth, cost);
         document.getElementById("output").innerText = JSON.stringify(results, null, 2);
       } catch (err) {
         document.getElementById("output").innerText = "错误: " + err;
+        console.error("运行错误:", err);
       }
     }
+    
+    // 添加重置功能
+    function resetDropzone(type) {
+      let dropzone = document.getElementById(type + "-drop");
+      let pathElement = document.getElementById(type + "-file-path");
+      
+      dropzone.innerHTML = `拖拽 <b>${type === "train" ? "训练集" : "测试集"}</b> 文件到此处`;
+      dropzone.classList.remove("has-file");
+      pathElement.textContent = "未选择";
+      
+      if (type === "train") {
+        trainFilePath = "";
+      } else {
+        testFilePath = "";
+      }
+    }
+    
+    // 添加右键菜单重置功能
+    document.getElementById("train-drop").addEventListener("contextmenu", e => {
+      e.preventDefault();
+      resetDropzone("train");
+    });
+    
+    document.getElementById("test-drop").addEventListener("contextmenu", e => {
+      e.preventDefault();
+      resetDropzone("test");
+    });
   </script>
 </body>
 </html>
