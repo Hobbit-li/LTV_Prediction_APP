@@ -1,8 +1,6 @@
 import os
-import sys
-import webview
 import logging
-from pathlib import Path
+import webview
 
 from app import run_pipeline
 from config_loader import resource_path
