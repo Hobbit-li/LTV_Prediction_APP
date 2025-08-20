@@ -10,13 +10,6 @@ import base64
 import io
 import json
 import matplotlib.pyplot as plt
-from sklearn.metrics import (
-    mean_squared_error,
-    mean_absolute_error,
-    mean_squared_log_error,
-    r2_score,
-)
-
 
 def compare_plot(preds_results, cycles=10):
     """
