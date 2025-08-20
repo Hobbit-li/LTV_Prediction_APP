@@ -5,6 +5,30 @@ Contains functions for displaying and analyzing model results
 Including ROAS and LTV (Aggregated indicators)
 """
 
+# Indicator evaluation
+def evaluate_ltv(preds_results, cycles=10):
+    """
+    Evaluate the aggregate indicator (LTV)
+    - parameters:
+        - preds_results: Predicted results by running the trained model
+        - cycles: Numbers of predicted cycles, default: 10
+    - return: RMSE, MAE, MSLE, R2
+    """
+    eval_dict = {}
+    for i in range(cycles):
+        y_true = preds_results[i]["actual"].values
+        y_pred = preds_results[i]["pred"].values
+        rmse = mean_squared_error(y_true, y_pred)
+        mae = mean_absolute_error(y_true, y_pred)
+        # msle = mean_squared_log_error(y_true, y_pred)
+        r2 = r2_score(y_true, y_pred)
+
+        eval_dict[f"Follow_Mon_{i}"] = {
+            "RMSE": round(rmse, 4),
+            "MAE": round(mae, 4),
+            "R2": round(r2, 4),
+        }
+    return eval_dict
 
 def show_roas_ltv(preds_results, cost, existed_tag, cycles=10):
     """
