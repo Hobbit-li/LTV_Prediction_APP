@@ -5,25 +5,26 @@ import logging
 from pathlib import Path
 
 from app import run_pipeline
+from config_loader import resource_path
 
 # 设置日志
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def resource_path(relative_path):
-    """
-    Get the absolute path to a resource, works for dev and for PyInstaller
-    """
-    if hasattr(sys, "_MEIPASS"):
-        # Running in bundled executable
-        base_path = sys._MEIPASS
-    else:
-        # Running in development
-        base_path = os.path.abspath(".")
-     # 规范化路径，确保使用正确的路径分隔符
-    normalized_path = os.path.normpath(os.path.join(base_path, relative_path))
-    logger.info(f"资源路径: {base_path} + {relative_path} = {normalized_path}")
-    return normalized_path
+# def resource_path(relative_path):
+#     """
+#     Get the absolute path to a resource, works for dev and for PyInstaller
+#     """
+#     if hasattr(sys, "_MEIPASS"):
+#         # Running in bundled executable
+#         base_path = sys._MEIPASS
+#     else:
+#         # Running in development
+#         base_path = os.path.abspath(".")
+#      # 规范化路径，确保使用正确的路径分隔符
+#     normalized_path = os.path.normpath(os.path.join(base_path, relative_path))
+#     logger.info(f"资源路径: {base_path} + {relative_path} = {normalized_path}")
+#     return normalized_path
 
 def validate_file_path(file_path):
     """
