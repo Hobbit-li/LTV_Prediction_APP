@@ -100,7 +100,7 @@ def run_pipeline(path_ref: str, path_pre: str, ref_month: str, cost: float):
             result_copy["valid"][group] = (x1, y1, *rest1) if rest else (x1, y1)
 
         preds_results[i] = predict_process(
-            result_copy,
+            result_test_copy,
             model_results[i]["model_clf"],
             model_results[i]["model_reg"],
             config,
