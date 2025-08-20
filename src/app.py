@@ -71,7 +71,10 @@ def run_pipeline(path_ref: str, path_pre: str, ref_month: str, cost: float):
     # ==============================
     preds_results = {}
     adjust_preds_results = {}
+    test_df = pd.read_csv(path_pre) if path_pre.endswith(".csv") else pd.read_excel(path_pre)
+    test_df.dropna(axis=1, how="all", inplace=True)
 
+    temp_result_test, _ = data_preprocess(test_df, config, ref_month, train_if=False)
     for i in range(pre_cycles):
         result_test_copy = copy.deepcopy(temp_result_test)
         result_copy = copy.deepcopy(temp_result)
