@@ -1,6 +1,7 @@
 name: Code Format & Lint Check
 
 on:
+  workflow_dispatch:  # Manual trigger
   push:
     paths:
       - '**.py'
