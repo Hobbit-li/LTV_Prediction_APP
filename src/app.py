@@ -204,6 +204,7 @@ def run_pipeline(path_ref: str, path_pre: str, ref_month: str, cost: float):
     # ==============================
     return {
         "model_evaluate": all_metrics,
-        "ROAS_LTV predictions": predictions_df,
+        # html 
+        "ROAS_LTV predictions": predictions_df.to_dict(orient="records"),
         "plots_show": plots_base64,
     }
