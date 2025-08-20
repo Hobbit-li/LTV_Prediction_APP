@@ -151,7 +151,7 @@ def run_pipeline(path_ref: str, path_pre: str, ref_month: str, cost: float):
             "LTV_pred_adjusted": v["LTV_pred"],
         } for i, v in roas_results_adjust.items()
     ])
-     merged_df = pd.merge(
+    merged_df = pd.merge(
         roas_df1,
         roas_df2,
         on="Subsequent Months",
