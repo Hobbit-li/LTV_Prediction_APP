@@ -23,10 +23,10 @@ import json
 from config_loader import load_config
 from data_utils import data_preprocess
 from predict import predict_process
-from results_show import show_roas_ltv
+from results_show import show_roas_ltv, evaluate_ltv
 from train import train_process
 from utils_io import create_output_dir, save_metrics, save_predictions
-from visual import compare_plot, evaluate_ltv, residual_plot
+from visual import compare_plot, residual_plot
 
 # ==============================
 # Logging Setup
