@@ -4,12 +4,15 @@ Numerical Results Presentation Module
 Contains functions for displaying and analyzing model results
 Including ROAS and LTV (Aggregated indicators)
 """
+
 from sklearn.metrics import (
     mean_squared_error,
     mean_absolute_error,
     mean_squared_log_error,
     r2_score,
 )
+
+
 # Indicator evaluation
 def evaluate_ltv(preds_results, cycles=10):
     """
@@ -34,6 +37,7 @@ def evaluate_ltv(preds_results, cycles=10):
             "R2": round(r2, 4),
         }
     return eval_dict
+
 
 def show_roas_ltv(preds_results, cost, existed_tag, cycles=10):
     """

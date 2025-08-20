@@ -4,9 +4,11 @@ Compatible with PyInstaller's temporary directory when bundled as an EXE.
 
 Handles configuration loading and structural validation.
 """
+
 import os
 import sys
 import yaml
+
 
 def resource_path(relative_path: str) -> str:
     """

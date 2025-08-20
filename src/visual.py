@@ -6,10 +6,12 @@ Provides visualization tools for model evaluation including:
 - LTV evaluation charts
 - Residual analysis plots
 """
+
 import base64
 import io
 import json
 import matplotlib.pyplot as plt
+
 
 def compare_plot(preds_results, cycles=10):
     """
@@ -46,6 +48,7 @@ def compare_plot(preds_results, cycles=10):
 
     return figs
 
+
 # Residual analysis
 def residual_plot(preds_results, cycles=10):
     """
@@ -73,6 +76,7 @@ def residual_plot(preds_results, cycles=10):
         figs.append(fig)
 
     return figs
+
 
 def fig_to_base64(fig):
     buf = io.BytesIO()
