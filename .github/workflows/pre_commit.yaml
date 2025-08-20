@@ -2,12 +2,12 @@ name: Code Format & Lint Check
 
 on:
   workflow_dispatch:  # Manual trigger
-  push:
-    paths:
-      - '**.py'
-  pull_request:
-    paths:
-      - '**.py'
+  # push:
+  #   paths:
+  #     - '**.py'
+  # pull_request:
+  #   paths:
+  #     - '**.py'
       
 permissions:
   contents: write 
