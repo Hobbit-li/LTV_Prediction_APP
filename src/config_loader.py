@@ -9,6 +9,7 @@ import yaml
 import os
 import sys
 
+
 def resource_path(relative_path: str) -> str:
     """
     Get the absolute path to a resource file.
@@ -17,7 +18,8 @@ def resource_path(relative_path: str) -> str:
     if hasattr(sys, "_MEIPASS"):  # Temporary directory when bundled as EXE
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.path.abspath("."), relative_path)
-    
+
+
 def load_config():
     """
     Load configuration from a YAML file.
@@ -27,7 +29,9 @@ def load_config():
 
     # If not found, fall back to the source code path
     if not os.path.exists(config_path):
-        base_dir = os.path.dirname(os.path.dirname(__file__))  # Go up to project root directory
+        base_dir = os.path.dirname(
+            os.path.dirname(__file__)
+        )  # Go up to project root directory
         config_path = os.path.join(base_dir, "config", "config.yaml")
 
     if not os.path.exists(config_path):

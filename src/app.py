@@ -71,7 +71,9 @@ def run_pipeline(path_ref: str, path_pre: str, ref_month: str, cost: float):
     # ==============================
     preds_results = {}
     adjust_preds_results = {}
-    test_df = pd.read_csv(path_pre) if path_pre.endswith(".csv") else pd.read_excel(path_pre)
+    test_df = (
+        pd.read_csv(path_pre) if path_pre.endswith(".csv") else pd.read_excel(path_pre)
+    )
     test_df.dropna(axis=1, how="all", inplace=True)
 
     temp_result_test, _ = data_preprocess(test_df, config, ref_month, train_if=False)
@@ -132,30 +134,35 @@ def run_pipeline(path_ref: str, path_pre: str, ref_month: str, cost: float):
     re_dict_adjust = evaluate_ltv(adjust_preds_results, pre_cycles)
 
     roas_results = show_roas_ltv(preds_results, cost, config["payer_tag"], pre_cycles)
-    roas_results_adjust = show_roas_ltv(adjust_preds_results, cost, config["payer_tag"], pre_cycles)
-    roas_df1 = pd.DataFrame([
-        {
-            "Subsequent Months": i+1,
-            "ROAS_actual": v["ROAS_actual"],
-            "ROAS_pred": v["ROAS_pred"],
-            "LTV_actual": v["LTV_actual"],
-            "LTV_pred": v["LTV_pred"],
-        } for i, v in roas_results.items()
-    ])
-    roas_df2 = pd.DataFrame([
-        {
-            "Subsequent Months": i+1,
-            "ROAS_actual": v["ROAS_actual"],
-            "ROAS_pred_adjusted": v["ROAS_pred"],
-            "LTV_actual": v["LTV_actual"],
-            "LTV_pred_adjusted": v["LTV_pred"],
-        } for i, v in roas_results_adjust.items()
-    ])
+    roas_results_adjust = show_roas_ltv(
+        adjust_preds_results, cost, config["payer_tag"], pre_cycles
+    )
+    roas_df1 = pd.DataFrame(
+        [
+            {
+                "Subsequent Months": i + 1,
+                "ROAS_actual": v["ROAS_actual"],
+                "ROAS_pred": v["ROAS_pred"],
+                "LTV_actual": v["LTV_actual"],
+                "LTV_pred": v["LTV_pred"],
+            }
+            for i, v in roas_results.items()
+        ]
+    )
+    roas_df2 = pd.DataFrame(
+        [
+            {
+                "Subsequent Months": i + 1,
+                "ROAS_actual": v["ROAS_actual"],
+                "ROAS_pred_adjusted": v["ROAS_pred"],
+                "LTV_actual": v["LTV_actual"],
+                "LTV_pred_adjusted": v["LTV_pred"],
+            }
+            for i, v in roas_results_adjust.items()
+        ]
+    )
     merged_df = pd.merge(
-        roas_df1,
-        roas_df2,
-        on="Subsequent Months",
-        suffixes=("_df1", "_df2")
+        roas_df1, roas_df2, on="Subsequent Months", suffixes=("_df1", "_df2")
     )
 
     # 判断是否一致
@@ -198,13 +205,12 @@ def run_pipeline(path_ref: str, path_pre: str, ref_month: str, cost: float):
         "residual_plots_adjusted": [fig_to_base64(f) for f in figs_res2],
     }
 
-
     # ==============================
     # Return summary
     # ==============================
     return {
         "model_evaluate": all_metrics,
-        # html 
+        # html
         "ROAS_LTV predictions": predictions_df.to_dict(orient="records"),
         "plots_show": plots_base64,
     }
