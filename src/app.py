@@ -119,28 +119,13 @@ def run_pipeline(path_ref: str, path_pre: str, ref_month: str, cost: float):
         adjust_preds_results[i]["pred"] = adjust_preds_results[i]["pred"] - adjustment
 
     # ==============================
-    # Step 6: Save metrics and plots
+    # Step 6: show metrics and plots
     # ==============================
-    output_dir = create_output_dir()
-    plots_dir = output_dir / "plots"
-    plots_dir.mkdir(exist_ok=True)
-    residual_dir = output_dir / "residual_plots"
-    residual_dir.mkdir(exist_ok=True)
 
-    # Save plots
     figs_com1 = compare_plot(preds_results, pre_cycles)
-    for i, fig in enumerate(figs_com1):
-        fig.savefig(plots_dir / f"compare_plot_cycle_{i}.png", dpi=150)
     figs_com2 = compare_plot(adjust_preds_results, pre_cycles)
-    for i, fig in enumerate(figs_com2):
-        fig.savefig(plots_dir / f"adjusted_compare_plot_cycle_{i}.png", dpi=150)
-
     figs_res1 = residual_plot(preds_results, pre_cycles)
-    for i, fig in enumerate(figs_res1):
-        fig.savefig(residual_dir / f"residual_plot_cycle_{i}.png", dpi=80)
     figs_res2 = residual_plot(adjust_preds_results, pre_cycles)
-    for i, fig in enumerate(figs_res2):
-        fig.savefig(residual_dir / f"residual_plot_adjusted_cycle_{i}.png", dpi=80)
 
     # Save metrics
     re_dict = evaluate_ltv(preds_results, pre_cycles)
@@ -148,22 +133,77 @@ def run_pipeline(path_ref: str, path_pre: str, ref_month: str, cost: float):
 
     roas_results = show_roas_ltv(preds_results, cost, config["payer_tag"], pre_cycles)
     roas_results_adjust = show_roas_ltv(adjust_preds_results, cost, config["payer_tag"], pre_cycles)
+    roas_df1 = pd.DataFrame([
+        {
+            "Subsequent Months": i+1,
+            "ROAS_actual": v["ROAS_actual"],
+            "ROAS_pred": v["ROAS_pred"],
+            "LTV_actual": v["LTV_actual"],
+            "LTV_pred": v["LTV_pred"],
+        } for i, v in roas_results.items()
+    ])
+    roas_df2 = pd.DataFrame([
+        {
+            "Subsequent Months": i+1,
+            "ROAS_actual": v["ROAS_actual"],
+            "ROAS_pred_adjusted": v["ROAS_pred"],
+            "LTV_actual": v["LTV_actual"],
+            "LTV_pred_adjusted": v["LTV_pred"],
+        } for i, v in roas_results_adjust.items()
+    ])
+     merged_df = pd.merge(
+        roas_df1,
+        roas_df2,
+        on="Subsequent Months",
+        suffixes=("_df1", "_df2")
+    )
+
+    # 判断是否一致
+    roas_equal = merged_df["ROAS_actual_df1"].equals(merged_df["ROAS_actual_df2"])
+    ltv_equal = merged_df["LTV_actual_df1"].equals(merged_df["LTV_actual_df2"])
+
+    if not roas_equal:
+        warnings.warn("⚠️ ROAS_actual 在两个 DataFrame 中不一致！")
+    if not ltv_equal:
+        warnings.warn("⚠️ LTV_actual 在两个 DataFrame 中不一致！")
+
+    # 整理列顺序
+    predictions_df = merged_df[
+        [
+            "Subsequent Months",
+            "ROAS_actual_df1",
+            "ROAS_pred",
+            "ROAS_pred_adjusted",
+            "LTV_actual_df1",
+            "LTV_pred",
+            "LTV_pred_adjusted",
+        ]
+    ].rename(
+        columns={
+            "ROAS_actual_df1": "ROAS_actual",
+            "LTV_actual_df1": "LTV_actual",
+        }
+    )
 
     all_metrics = {
         "ltv": re_dict,
         "ltv_adjusted": re_dict_adjust,
-        "roas": roas_results,
-        "roas_adjusted": roas_results_adjust,
     }
 
-    json_path = output_dir / "metrics_all.json"
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(all_metrics, f, ensure_ascii=False, indent=2)
+    # Encode plots
+    plots_base64 = {
+        "compare_plots": [fig_to_base64(f) for f in figs_com1],
+        "compare_plots_adjusted": [fig_to_base64(f) for f in figs_com2],
+        "residual_plots": [fig_to_base64(f) for f in figs_res1],
+        "residual_plots_adjusted": [fig_to_base64(f) for f in figs_res2],
+    }
+
 
     # ==============================
     # Return summary
     # ==============================
     return {
-        "output_dir": str(output_dir),
-        "metrics": all_metrics,
+        "model_evaluate": all_metrics,
+        "ROAS_LTV predictions": predictions_df,
+        "plots_show": plots_base64,
     }
