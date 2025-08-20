@@ -37,6 +37,27 @@
       background: #f9f9f9;
       border: 1px solid #ddd;
     }
+    table { 
+      border-collapse: collapse; 
+      width: 100%; 
+      margin: 20px 0; 
+    }
+    th, td { 
+      border: 1px solid #ddd; 
+      padding: 8px; 
+      text-align: center; 
+    }
+    th { 
+      background: #f0f0f0;
+    }
+    .plot-container { 
+        margin: 20px 0; 
+    }
+    .plot-container img { 
+        max-width: 100%; 
+        margin-bottom: 15px; 
+        border: 1px solid #ccc; 
+    }
   </style>
 </head>
 <body>
@@ -58,13 +79,19 @@
   <input type="text" id="ref_month" placeholder="例如 m5"><br>
 
   <label>成本 (cost):</label><br>
-  <input type="number" id="cost" placeholder="例如 1000000"><br>
+  <input type="number" id="cost" placeholder="例如 1000000.00、1000000"><br>
 
   <button onclick="runPipeline()">运行模型</button>
 
   <h2>结果:</h2>
-  <pre id="output"></pre>
+  <h3>指标 (Metrics)</h3>
+  <pre id="metrics"></pre>
 
+  <h3>预测结果表格 (ROAS / LTV)</h3>
+  <div id="predictions-table"></div>
+
+  <h3>图像 (Plots)</h3>
+  <div id="plots"></div>
   <script>
     let trainFilePath = "";
     let testFilePath = "";
@@ -135,10 +162,53 @@
         }
         
         let results = await window.pywebview.api.run_model(trainFilePath, testFilePath, refMonth, cost);
-        document.getElementById("output").innerText = JSON.stringify(results, null, 2);
+        // 1. 展示指标
+        document.getElementById("metrics").innerText = JSON.stringify(results.model_evaluate, null, 2);
+
+        // 2. 展示表格
+        renderTable(results["ROAS_LTV predictions"]);
+
+        // 3. 展示图像
+        renderPlots(results.plots_show);
+
       } catch (err) {
         document.getElementById("output").innerText = "错误: " + err;
         console.error("运行错误:", err);
+      }
+    }
+
+    // 将 DataFrame 转换成 HTML 表格
+    function renderTable(df) {
+      if (!df || df.length === 0) {
+        document.getElementById("predictions-table").innerHTML = "无数据";
+        return;
+      }
+      let cols = Object.keys(df[0]);
+      let html = "<table><thead><tr>";
+      cols.forEach(c => html += "<th>" + c + "</th>");
+      html += "</tr></thead><tbody>";
+      df.forEach(row => {
+        html += "<tr>";
+        cols.forEach(c => html += "<td>" + row[c] + "</td>");
+        html += "</tr>";
+      });
+      html += "</tbody></table>";
+      document.getElementById("predictions-table").innerHTML = html;
+    }
+
+    // 渲染 base64 图像
+    function renderPlots(plots) {
+      let container = document.getElementById("plots");
+      for (let category in plots) {
+        let div = document.createElement("div");
+        div.className = "plot-container";
+        div.innerHTML = `<h4>${category}</h4>`;
+        plots[category].forEach(base64img => {
+          let img = document.createElement("img");
+          img.src = "data:image/png;base64," + base64img;
+          div.appendChild(img);
+        });
+        container.appendChild(div);
       }
     }
     
