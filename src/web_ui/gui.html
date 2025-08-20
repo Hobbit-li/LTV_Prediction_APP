@@ -153,7 +153,9 @@
         return;
       }
 
-      document.getElementById("output").innerText = "运行中...";
+      document.getElementById("metrics").innerText = "运行中...";
+      document.getElementById("predictions-table").innerHTML = "";
+      document.getElementById("plots").innerHTML = "";
 
       try {
         // 检查API是否可用
@@ -172,7 +174,7 @@
         renderPlots(results.plots_show);
 
       } catch (err) {
-        document.getElementById("output").innerText = "错误: " + err;
+        document.getElementById("metrics").innerText = "错误: " + err;
         console.error("运行错误:", err);
       }
     }
