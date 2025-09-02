@@ -70,8 +70,8 @@ def main():
     logging.info("DataFrame Describe:\n%s", df.describe().to_string())
     logging.debug("DataFrame head:\n%s", df.head())
 
-    ref_month = "m5"
-    cost = 1234992
+    ref_month = "m1"
+    cost = 900281
 
     # ==============================
     # Step 3: Data preprocessing
