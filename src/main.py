@@ -120,9 +120,9 @@ def main():
     # ==============================
     logging.info("Step 5: Preparing test data")
     path_pre = (
-        Path(__file__).parent.parent / "data" / "20250812_100210_09037_tej97.csv.gz"
+        Path(__file__).parent.parent / "data" / "data/20250902_080214_34788_3qdzt.csv"
     )
-    test_df = pd.read_csv(path_pre, compression="gzip")
+    test_df = pd.read_csv(path_pre)
     test_df.dropna(axis=1, how="all", inplace=True)
     temp_result_test, _ = data_preprocess(test_df, config, ref_month, train_if=False)
 
