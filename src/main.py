@@ -120,7 +120,7 @@ def main():
     # ==============================
     logging.info("Step 5: Preparing test data")
     path_pre = (
-        Path(__file__).parent.parent / "data" / "data/20250902_080214_34788_3qdzt.csv"
+        Path(__file__).parent.parent / "data" / "20250902_080214_34788_3qdzt.csv"
     )
     test_df = pd.read_csv(path_pre)
     test_df.dropna(axis=1, how="all", inplace=True)
