@@ -60,7 +60,7 @@ def show_roas_ltv(preds_results, cost, existed_tag, cycles=10):
       }
     """
     result = {}
-    existed_tag = [col for col in existed_tag if col in preds_results.columns]
+    existed_tag = [col for col in existed_tag if col in preds_results[0].columns]
     ltv_existed = preds_results[0][existed_tag].sum(axis=1)
     y_pred = preds_results[0]["pred"]
     y_actual = preds_results[0]["actual"]
